@@ -15,11 +15,11 @@ import { Label } from "@/components/ui/label"
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertDialog } from "@radix-ui/react-alert-dialog"
 import { Alert } from "../ui/alert"
 
+
 export const description =
-    "A simple login form with email and password. The submit button says 'Sign in'."
+    "A simple login form with email and password. The submit button says 'Log in'."
 
 export const iframeHeight = "600px"
 
@@ -57,7 +57,11 @@ const loginSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters").max(200, "Password must be at most 200 characters")
 });
 
-export default function LoginForm() {
+interface LoginFormProps {
+    onLoginSuccess: () => void;
+}
+
+export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     const {
         register,
         handleSubmit,
@@ -71,6 +75,7 @@ export default function LoginForm() {
             password: '',
         },
     });
+
 
 
     const onSubmit = async (values: LoginFormData) => {
@@ -88,6 +93,10 @@ export default function LoginForm() {
 
             const data = await response.json();
             console.log("Login successful:", data);
+
+            onLoginSuccess();
+
+
         } catch (error: any) {
             console.log("Error during login:", error);
             setError("root", { message: error.message || "An unknown error occurred." });

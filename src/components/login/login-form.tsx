@@ -94,6 +94,9 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
             const data = await response.json();
             console.log("Login successful:", data);
 
+            //localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
+            //localStorage.setItem("refreshToken", JSON.stringify(data.refreshToken));
+
             onLoginSuccess();
 
 

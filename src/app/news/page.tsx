@@ -1,17 +1,9 @@
 "use client"
-import Image from "next/image";
+
 import React from "react";
 //import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { NewsCard } from "../components/news_and_posts/NewsCard";
+
+import { NewsCard } from "../../components/news_and_posts/NewsCard";
 
 
 const newsList = [
@@ -35,7 +27,7 @@ const newsList = [
     date: "October 21, 2024",
     title: "Climate Change: A Global Issue",
     description:
-      "The effects of climate change continue to impact ecosystems worldwide...",
+      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Error atque aliquam, eligendi neque nesciunt, et rem recusandae culpa aspernatur ipsa repudiandae perferendis quia officiis ducimus ex incidunt excepturi debitis nemo?",
     imageUrl: "https://i.pinimg.com/control/564x/c6/b5/8a/c6b58a94473720d038dc599de24dcbfb.jpg",
     categories: ["Environment", "Climate"],
     likes: 200,

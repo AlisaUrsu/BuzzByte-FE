@@ -1,17 +1,9 @@
 "use client"
-import Image from "next/image";
+
 import React from "react";
 //import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { NewsCard } from "../components/news_and_posts/NewsCard";
+
+import { PostCard } from "../../components/news_and_posts/PostCard";
 
 
 const newsList = [
@@ -49,7 +41,7 @@ export default function Home() {
     <>
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
         {newsList.map((newsItem, index) => (
-          <NewsCard
+          <PostCard
             key={index}
             avatarUrl={newsItem.avatarUrl}
             avatarFallback={newsItem.avatarFallback}
@@ -57,7 +49,6 @@ export default function Home() {
             date={newsItem.date}
             title={newsItem.title}
             description={newsItem.description}
-            imageUrl={newsItem.imageUrl}
             categories={newsItem.categories}
             likes={newsItem.likes}
             comments={newsItem.comments}

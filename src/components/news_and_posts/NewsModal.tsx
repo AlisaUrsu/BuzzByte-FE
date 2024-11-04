@@ -9,7 +9,7 @@ type NewsModalProps = {
   date: string;
   title: string;
   description: string;
-  imageUrl?: string;
+  urlToImage?: string;
   categories: string[];
 };
 
@@ -22,11 +22,11 @@ export function NewsModal({
   date,
   title,
   description,
-  imageUrl,
+  urlToImage,
   categories,
 }: NewsModalProps) {
   if (!isOpen) return null;
-
+ 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="relative bg-white p-8 rounded-lg shadow-lg w-11/12 max-w-4xl h-5/6 overflow-y-auto">
@@ -61,9 +61,9 @@ export function NewsModal({
         <p className="text-gray-700 mb-4 break-words text-justify">{description}</p> {/* Wraps text */}
 
         {/* Image */}
-        {imageUrl && (
+        {urlToImage && (
           <img
-            src={imageUrl}
+            src={urlToImage}
             alt="News Image"
             className="w-full h-64 object-cover rounded-lg mb-6"
           />

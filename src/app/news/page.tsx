@@ -1,9 +1,11 @@
 "use client"
 
-import React from "react";
+import {useState,useEffect} from "react";
 //import { Calendar } from "@/components/ui/calendar"
 
-import { NewsCard } from "../../components/news_and_posts/NewsCard";
+
+import { NewsCard, NewsCardProps } from "../../components/news_and_posts/NewsCard";
+
 
 
 const newsList = [
@@ -35,24 +37,67 @@ const newsList = [
   },
 ];
 
+
+
+
 export default function Home() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
+
+  //TBD insert some tags for news api  
+  const [date, setDate] = useState<Date | undefined>(new Date())
+  const [newsList, setNewsList] = useState<NewsCardProps[]>([]);
+  const [tags, setTags] = useState(["AI", "Tech"]);
+  const fetchNewsForTag = async (tag: string, articlesPerTag:number) => {
+    try {
+      const response = await fetch(`https://newsapi.org/v2/everything?q=${tag}&pageSize=${articlesPerTag}&apiKey=02e8510d2a9e4f7c980a8d48d379464e`);
+      const data = await response.json();
+      return data.articles.filter(article => article.urlToImage).map(article => ({
+        ...article,
+        categories: [tag],
+        likes: 0,
+        comments: 0,
+      }));
+    } catch (error) {
+      console.error(`Error fetching news for tag ${tag}:`, error);
+      return []; 
+    }
+  };
+
+  const fetchAllNews = async () => {
+    //setLoading(true);
+    try {
+      const allArticlesPromises = tags.map(tag => fetchNewsForTag(tag,10));
+      const allArticlesArrays = await Promise.all(allArticlesPromises);
+      const combinedArticles = allArticlesArrays.flat(); 
+      const shufledArticles = combinedArticles.sort(() => 0.5 - Math.random());
+      setNewsList(shufledArticles);
+    } catch (error) {
+      console.error("Error fetching all news:", error);
+    } finally {
+      //setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllNews();
+  }, []);
+
   return (
     <>
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
         {newsList.map((newsItem, index) => (
           <NewsCard
             key={index}
-            avatarUrl={newsItem.avatarUrl}
+            avatarUrl={"https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Fcute_260185&psig=AOvVaw3ivSdPaeQZ_3MNDnGiyUG6&ust=1730831632559000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCIDqhreow4kDFQAAAAAdAAAAABAE"}
             avatarFallback={newsItem.avatarFallback}
             userName={newsItem.userName}
             date={newsItem.date}
             title={newsItem.title}
             description={newsItem.description}
-            imageUrl={newsItem.imageUrl}
+            urlToImage={newsItem.urlToImage}
+            // categories={newsItem.categories}
             categories={newsItem.categories}
-            likes={newsItem.likes}
-            comments={newsItem.comments}
+            likes={0}  //TBD: ask people what to do when it comes to likes and comments.... cause i dont know if i store the news in database 
+            comments={0}
           />
         ))}
       </div>

@@ -1,6 +1,8 @@
 "use client"
 import Image from "next/image";
 import React from "react";
+import NavBar from "../components/news_and_posts/NavBar";
+
 //import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,7 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { NewsCard } from "../components/news_and_posts/NewsCard";
-
 
 const newsList = [
   {
@@ -47,6 +48,7 @@ export default function Home() {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   return (
     <>
+      <NavBar />
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
         {newsList.map((newsItem, index) => (
           <NewsCard

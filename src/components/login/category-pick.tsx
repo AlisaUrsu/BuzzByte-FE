@@ -29,41 +29,24 @@ const CategoryPickPage = ({ onSubmit }: CategoryPickPageProps) => {
     //hardcoded categories to test desgin
 
     const categories = [
-        // Programming Languages
         "JavaScript", "Python", "Java", "C#", "C++",
         "Ruby", "Go", "Rust", "TypeScript", "PHP",
         "Swift", "Kotlin", "Dart", "HTML & CSS",
-
-        // Frontend Frameworks & Libraries
         "React", "Angular", "Vue.js", "Svelte", "Ember.js",
-
-        // Backend Frameworks & Libraries
         "Node.js", "Express.js", "Laravel", "Django", "Flask",
         "Spring Boot", "ASP.NET",
-
-        // Databases
         "SQL", "NoSQL", "MongoDB", "PostgreSQL", "MySQL",
         "Firebase", "GraphQL",
-
-        // Cloud & Infrastructure
         "AWS (Amazon Web Services)", "Google Cloud", "Azure",
         "Docker", "Kubernetes", "Serverless Architecture",
         "Continuous Integration (CI/CD)", "DevOps",
-
-        // Web Development
         "Progressive Web Apps (PWAs)", "REST APIs",
         "Microservices", "HTTP/HTTPS", "WebAssembly",
-
-        // Software Development Methodologies
         "Agile Methodology", "Scrum", "Kanban",
         "Test-Driven Development (TDD)", "Pair Programming",
-
-        // Artificial Intelligence & Machine Learning
         "Machine Learning", "Deep Learning", "Neural Networks",
         "Natural Language Processing (NLP)", "Computer Vision",
         "Reinforcement Learning",
-
-        // Data Science & Analytics
         "Data Science", "Data Visualization", "Big Data",
         "Business Intelligence", "Predictive Analytics"
     ];
@@ -86,7 +69,7 @@ const CategoryPickPage = ({ onSubmit }: CategoryPickPageProps) => {
 
             <div className="border rounded-lg shadow-md p-4 bg-white">
 
-                <div className="flex justify-center">
+                <div className="flex justify-center pb-3">
                     <h2 className="text-lg font-semibold">Selected Categories</h2>
                 </div>
 
@@ -99,7 +82,7 @@ const CategoryPickPage = ({ onSubmit }: CategoryPickPageProps) => {
                 </div>
 
                 <hr className="m-3"></hr>
-                <div className="flex justify-center"><h2 className="text-lg font-semibold">Select More</h2></div>
+                <div className="flex justify-center pb-3"><h2 className="text-lg font-semibold">Select More</h2></div>
 
 
                 <div className="flex justify-center">

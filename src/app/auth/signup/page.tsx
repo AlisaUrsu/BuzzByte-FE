@@ -48,9 +48,40 @@ export default function SignUpPage() {
         <>
 
             <div className="w-full h-screen flex items-center justify-center px-4">
-                {page === 1 ? <SignUpForm onNext={onNext} /> : <div className="w-[60%]"><CategoryPickPage onSubmit={onSubmit} /></div>}
+                {page === 1 ? (
+                    <Page1 onNext={onNext} />
+                ) : (
+
+                    <CategoryPickPage onSubmit={onSubmit} />
+
+                )}
             </div>
+            {/* background */}
+            <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"></div>
 
         </>
     );
 }
+
+type Page1Props = {
+    onNext: (username: string, email: string, password: string) => void;
+}
+
+function Page1({ onNext }: Page1Props) {
+    return (
+        <div className="flex min-h-screen">
+
+            <div className="flex-1 flex flex-col justify-center items-center text-white p-8">
+                <h1 className="text-4xl font-semibold mb-4">Join Us Today!</h1>
+                <p className="text-lg text-center">
+                    Sign up to unlock exclusive features, enjoy personalized content, and connect with a vibrant community!
+                </p>
+            </div>
+
+            <div className="flex-1 flex justify-center items-center ">
+                <SignUpForm onNext={onNext} />
+            </div>
+        </div>
+    );
+}
+

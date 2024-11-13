@@ -72,7 +72,7 @@ export default function SignUpForm({ onNext }: SignUpFormProps) {
             <CardHeader>
                 <CardTitle className="text-2xl">Sign up</CardTitle>
                 <CardDescription>
-                    Unlock exclusive features, personalized content, and connect with a vibrant community!
+                    You're one step away!
                 </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit(onSubmit)}>

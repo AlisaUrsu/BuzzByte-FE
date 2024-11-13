@@ -38,9 +38,11 @@ export default function SignUpPage() {
             categories
         })
 
-        console.log("USER:", user)
+        //here user doesnt have the categories yet
+        console.log("CATEGORIES: ", categories)
         // post to backend and store in local storage the tokens + username
         localStorage.setItem("username", user.username)
+        localStorage.setItem("categories", JSON.stringify(categories))
         router.push("/")
     }
 
@@ -56,7 +58,7 @@ export default function SignUpPage() {
 
                 )}
             </div>
-            {/* background */}
+            {/* background might have to be fixed later*/}
             <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"></div>
 
         </>

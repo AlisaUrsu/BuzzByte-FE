@@ -78,7 +78,14 @@ function Page1({ onNext }: Page1Props) {
                 <p className="text-lg text-center">
                     Sign up to unlock exclusive features, enjoy personalized content, and connect with a vibrant community!
                 </p>
+                <p className="text-sm text-white m-4">
+                    Already have an account?{" "}
+                    <a href="/auth/login" className="text-blue-500 hover:underline">
+                        Log In
+                    </a>
+                </p>
             </div>
+
 
             <div className="flex-1 flex justify-center items-center ">
                 <SignUpForm onNext={onNext} />

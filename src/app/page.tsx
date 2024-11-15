@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { NewsCard } from "./NewsCard";
+import { useAuthRedirect } from "@/hooks/use-auth";
 
 
 const newsList = [
@@ -44,6 +45,8 @@ const newsList = [
 ];
 
 export default function Home() {
+  useAuthRedirect(); //fix so it doesnt render the page before
+
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   return (
     <>

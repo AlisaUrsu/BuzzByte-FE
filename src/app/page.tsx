@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card"
 import { NewsCard } from "./NewsCard";
 import { useAuthRedirect } from "@/hooks/use-auth";
+import { RouteGuard } from "@/components/login/route-guard";
 
 
 const newsList = [
@@ -45,28 +46,30 @@ const newsList = [
 ];
 
 export default function Home() {
-  useAuthRedirect(); //fix so it doesnt render the page before
+  //useAuthRedirect(); //use this is routeguard doesnt work
 
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-        {newsList.map((newsItem, index) => (
-          <NewsCard
-            key={index}
-            avatarUrl={newsItem.avatarUrl}
-            avatarFallback={newsItem.avatarFallback}
-            userName={newsItem.userName}
-            date={newsItem.date}
-            title={newsItem.title}
-            description={newsItem.description}
-            imageUrl={newsItem.imageUrl}
-            categories={newsItem.categories}
-            likes={newsItem.likes}
-            comments={newsItem.comments}
-          />
-        ))}
-      </div>
+      <RouteGuard>
+        <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {newsList.map((newsItem, index) => (
+            <NewsCard
+              key={index}
+              avatarUrl={newsItem.avatarUrl}
+              avatarFallback={newsItem.avatarFallback}
+              userName={newsItem.userName}
+              date={newsItem.date}
+              title={newsItem.title}
+              description={newsItem.description}
+              imageUrl={newsItem.imageUrl}
+              categories={newsItem.categories}
+              likes={newsItem.likes}
+              comments={newsItem.comments}
+            />
+          ))}
+        </div>
+      </RouteGuard>
     </>
   );
 }

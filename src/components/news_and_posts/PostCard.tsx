@@ -1,34 +1,32 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "../components/ui/avatar";
-import { Badge } from "../components/ui/badge";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "../components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import { Select, SelectTrigger, SelectContent, SelectItem } from "../ui/select"
 import { MoreHorizontal, Heart, MessageCircle, Bookmark } from "lucide-react";
 import { useState } from "react";
 
-type NewsCardProps = {
+type PostCardProps = {
   avatarUrl: string;
   avatarFallback: string;
   userName: string;
   date: string;
   title: string;
   description: string;
-  imageUrl: string;
   categories: string[];
   likes: number;
   comments: number;
 };
 
-export function NewsCard({
+export function PostCard({
     avatarUrl,
     avatarFallback,
     date,
     title,
     description,
-    imageUrl,
     categories,
     likes,
     comments,
-  }: NewsCardProps) {
+  }: PostCardProps) {
     const [liked, setLiked] = useState(false);
     const [commented, setCommented] = useState(false);
     const [bookmarked, setBookmarked] = useState(false);
@@ -58,14 +56,6 @@ export function NewsCard({
             </Select>
           </div>
         </CardHeader>
-  
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt="News"
-            className="w-full h-48 object-cover rounded-md mb-4"
-          />
-        )}
   
         <CardContent className="">
           <CardTitle className="font-bold text-lg">{title}</CardTitle>

@@ -49,6 +49,7 @@ export default function Home() {
   return (
     <>
       <NavBar />
+      <br />
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
         {newsList.map((newsItem, index) => (
           <NewsCard

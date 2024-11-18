@@ -1,4 +1,5 @@
 import { X } from "lucide-react"; // Import the close icon
+import { NewsComments, Comment, NewsCommentsProps } from "./NewsComments";
 
 type NewsModalProps = {
   isOpen: boolean;
@@ -11,6 +12,10 @@ type NewsModalProps = {
   description: string;
   urlToImage?: string;
   categories: string[];
+  comments: Comment[];
+  onAddComment: (comment: Omit<Comment, 'id' | 'createdAt' | 'likes'>) => void;
+  postId: string;
+
 };
 
 export function NewsModal({
@@ -24,13 +29,16 @@ export function NewsModal({
   description,
   urlToImage,
   categories,
+  onAddComment,
+  postId,
+  comments
 }: NewsModalProps) {
   if (!isOpen) return null;
- 
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="relative bg-white p-8 rounded-lg shadow-lg w-11/12 max-w-4xl h-5/6 overflow-y-auto">
-        
+
         {/* Close button */}
         <button
           onClick={onClose}
@@ -79,7 +87,12 @@ export function NewsModal({
               {category}
             </span>
           ))}
-        </div> 
+        </div>
+        <NewsComments
+          postId={postId}
+          comments={comments}
+          onAddComment={onAddComment}
+        />
       </div>
     </div>
   );

@@ -1,21 +1,9 @@
 "use client"
-import Image from "next/image";
-import React from "react";
-import NavBar from "../components/news_and_posts/NavBar";
 
+import React from "react";
 //import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { NewsCard } from "./NewsCard";
-import { useAuthRedirect } from "@/hooks/use-auth";
-import { RouteGuard } from "@/components/login/route-guard";
+
+import { PostCard } from "../../components/news_and_posts/PostCard";
 
 
 const newsList = [
@@ -48,32 +36,25 @@ const newsList = [
 ];
 
 export default function Home() {
-  //useAuthRedirect(); //use this is routeguard doesnt work
-
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   return (
     <>
-      <NavBar />
-      <br />
-      <RouteGuard>
-        <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {newsList.map((newsItem, index) => (
-            <NewsCard
-              key={index}
-              avatarUrl={newsItem.avatarUrl}
-              avatarFallback={newsItem.avatarFallback}
-              userName={newsItem.userName}
-              date={newsItem.date}
-              title={newsItem.title}
-              description={newsItem.description}
-              imageUrl={newsItem.imageUrl}
-              categories={newsItem.categories}
-              likes={newsItem.likes}
-              comments={newsItem.comments}
-            />
-          ))}
-        </div>
-      </RouteGuard>
+      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+        {newsList.map((newsItem, index) => (
+          <PostCard
+            key={index}
+            avatarUrl={newsItem.avatarUrl}
+            avatarFallback={newsItem.avatarFallback}
+            userName={newsItem.userName}
+            date={newsItem.date}
+            title={newsItem.title}
+            description={newsItem.description}
+            categories={newsItem.categories}
+            likes={newsItem.likes}
+            comments={newsItem.comments}
+          />
+        ))}
+      </div>
     </>
   );
 }

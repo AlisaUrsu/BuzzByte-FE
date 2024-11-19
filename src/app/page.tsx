@@ -4,17 +4,8 @@ import React from "react";
 import NavBar from "../components/news_and_posts/NavBar";
 
 //import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { NewsCard } from "./NewsCard";
-import { useAuthRedirect } from "@/hooks/use-auth";
+
+import { NewsCard } from "../components/news_and_posts/NewsCard";
 import { RouteGuard } from "@/components/login/route-guard";
 
 
@@ -67,6 +58,7 @@ export default function Home() {
               title={newsItem.title}
               description={newsItem.description}
               imageUrl={newsItem.imageUrl}
+              urlToImage = {newsItem.imageUrl}
               categories={newsItem.categories}
               likes={newsItem.likes}
               comments={newsItem.comments}

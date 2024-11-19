@@ -136,6 +136,9 @@ export function NewsCard({
           <div className="text-xs text-center w-full text-muted-foreground font-semibold">
             {date}
           </div>
+
+          <br />
+
           <div className="absolute top-2 right-2">
             <Select>
               <SelectTrigger className="p-2">
@@ -180,9 +183,8 @@ export function NewsCard({
           <div className="mt-4 flex justify-between items-center">
             <div className="flex space-x-4 items-center text-muted-foreground">
               <div
-                className={`flex items-center space-x-1 cursor-pointer ${
-                  liked ? "text-red-500" : ""
-                }`}
+                className={`flex items-center space-x-1 cursor-pointer ${liked ? "text-red-500" : ""
+                  }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setLiked(!liked);
@@ -193,9 +195,8 @@ export function NewsCard({
               </div>
 
               <div
-                className={`flex items-center space-x-1 cursor-pointer ${
-                  commented ? "text-blue-500" : ""
-                }`}
+                className={`flex items-center space-x-1 cursor-pointer ${commented ? "text-blue-500" : ""
+                  }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setCommented(!commented);
@@ -207,9 +208,8 @@ export function NewsCard({
             </div>
 
             <div
-              className={`cursor-pointer ${
-                bookmarked ? "text-yellow-500" : ""
-              }`}
+              className={`cursor-pointer ${bookmarked ? "text-yellow-500" : ""
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setBookmarked(!bookmarked);

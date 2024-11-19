@@ -95,6 +95,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
             console.log("Login successful:", data);
 
             localStorage.setItem("username", "something")
+            localStorage.setItem("categories", JSON.stringify(["AI"]))
             //localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
             //localStorage.setItem("refreshToken", JSON.stringify(data.refreshToken));
 

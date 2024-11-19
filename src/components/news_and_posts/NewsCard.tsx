@@ -28,6 +28,7 @@ export type NewsCardProps = {
 };
 
 import { NewsModal } from "./NewsModal";
+import { Comment } from "./NewsComments";
 
 export function NewsCard({
   avatarUrl,
@@ -231,8 +232,9 @@ export function NewsCard({
         title={title}
         description={description}
         urlToImage={urlToImage}
-        categories={categories}
-      />
+        categories={categories} comments={[]} onAddComment={function (comment: Omit<Comment, "id" | "createdAt" | "likes">): void {
+          throw new Error("Function not implemented.");
+        } } postId={""}      />
     </>
   );
 }

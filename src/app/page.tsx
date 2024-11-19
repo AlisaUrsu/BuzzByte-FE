@@ -1,15 +1,12 @@
 "use client"
-import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../components/news_and_posts/NavBar";
-
-//import { Calendar } from "@/components/ui/calendar"
-
-import { NewsCard } from "../components/news_and_posts/NewsCard";
+import { NewsCard, NewsCardProps } from "../components/news_and_posts/NewsCard";
 import { RouteGuard } from "@/components/login/route-guard";
+import { fetchNews } from "@/services/newsService";
 
 
-const newsList = [
+const initialNewsList = [
   {
     avatarUrl: "https://i.pinimg.com/736x/d0/31/64/d03164b012f9a7ac5683ba646357eb72.jpg",
     avatarFallback: "A1",
@@ -39,16 +36,26 @@ const newsList = [
 ];
 
 export default function Home() {
-  //useAuthRedirect(); //use this is routeguard doesnt work
 
-  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [news, setNews] = useState<NewsCardProps[]>([]);
+  const [date, setDate] = useState<Date | undefined>(new Date());
+
+  useEffect(() => {
+    const loadNews = async () => {
+      const fetchedNews = await fetchNews();
+      setNews(fetchedNews);
+    };
+    loadNews();
+  }, []);
+
+  //useAuthRedirect(); //use this is routeguard doesnt work
   return (
     <>
       <NavBar />
       <br />
       <RouteGuard>
         <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {newsList.map((newsItem, index) => (
+          {news.map((newsItem, index) => (
             <NewsCard
               key={index}
               avatarUrl={newsItem.avatarUrl}
@@ -69,3 +76,7 @@ export default function Home() {
     </>
   );
 }
+function setNewsList(news: NewsCardProps[]) {
+  throw new Error("Function not implemented.");
+}
+

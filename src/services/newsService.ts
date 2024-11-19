@@ -20,17 +20,21 @@ export interface NewsApiArticle {
     articles: NewsApiArticle[];
   }
   
-  export const fetchNews = async (): Promise<NewsCardProps[]> => {
+  export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
     const API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY;
-    // Modified URL to include technology category
-    const API_URL = `https://newsapi.org/v2/top-headlines?category=technology&apiKey=${API_KEY}`;
+    const pageSize = 10;
+    const API_URL = `https://newsapi.org/v2/top-headlines?category=technology&pageSize=${pageSize}&page=${page}&apiKey=${API_KEY}`;
   
     try {
       const response = await fetch(API_URL);
       const data: NewsApiResponse = await response.json();
+
+      if (data.status !== "ok") {
+        throw new Error("Failed to fetch news");
+      }
   
       return data.articles.map(article => ({
-        avatarUrl: "https://via.placeholder.com/40",
+        avatarUrl: "https://avatar.iran.liara.run/public",
         avatarFallback: article.source.name[0],
         userName: article.source.name,
         date: new Date(article.publishedAt).toLocaleDateString(),
@@ -38,8 +42,8 @@ export interface NewsApiArticle {
         description: article.description || "",
         imageUrl: article.urlToImage || "",
         urlToImage: article.urlToImage || "",
-        // Added tech-specific categories
-        categories: ["Tech", "Technology", article.source.name], 
+        sourceUrl: article.url,
+        categories: ["Technology", article.source.name], 
         likes: 0, 
         comments: 0, 
       }));

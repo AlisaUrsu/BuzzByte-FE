@@ -21,6 +21,7 @@ export type NewsCardProps = {
   title: string;
   description: string;
   imageUrl: string;
+  sourceUrl: string;
   categories: string[];
   likes: number;
   comments: number;
@@ -38,6 +39,7 @@ export function NewsCard({
   title,
   description,
   urlToImage,
+  sourceUrl,
   categories,
   likes,
   comments,
@@ -232,9 +234,10 @@ export function NewsCard({
         title={title}
         description={description}
         urlToImage={urlToImage}
+        sourceUrl={sourceUrl}
         categories={categories} comments={[]} onAddComment={function (comment: Omit<Comment, "id" | "createdAt" | "likes">): void {
           throw new Error("Function not implemented.");
-        } } postId={""}      />
+        }} postId={""} />
     </>
   );
 }

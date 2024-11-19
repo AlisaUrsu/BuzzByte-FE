@@ -1,54 +1,51 @@
 "use client"
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import NavBar from "../components/news_and_posts/NavBar";
 import { NewsCard, NewsCardProps } from "../components/news_and_posts/NewsCard";
 import { RouteGuard } from "@/components/login/route-guard";
 import { fetchNews } from "@/services/newsService";
 
-
-const initialNewsList = [
-  {
-    avatarUrl: "https://i.pinimg.com/736x/d0/31/64/d03164b012f9a7ac5683ba646357eb72.jpg",
-    avatarFallback: "A1",
-    userName: "TechCrunch",
-    date: "October 23, 2024",
-    title: "New AI Breakthrough in 2024",
-    description:
-      "Scientists have made significant advancements in AI technology...",
-    imageUrl: "https://i.pinimg.com/control/564x/bd/f6/08/bdf60812293828f6b675f7a6711c8448.jpg",
-    categories: ["AI", "Tech", "Innovation"],
-    likes: 120,
-    comments: 15,
-  },
-  {
-    avatarUrl: "https://i.pinimg.com/control/564x/4e/78/2f/4e782fbe73a6f573160c61b183a16971.jpg",
-    avatarFallback: "A2",
-    userName: "BBC News",
-    date: "October 21, 2024",
-    title: "Climate Change: A Global Issue",
-    description:
-      "The effects of climate change continue to impact ecosystems worldwide...",
-    imageUrl: "https://i.pinimg.com/control/564x/c6/b5/8a/c6b58a94473720d038dc599de24dcbfb.jpg",
-    categories: ["Environment", "Climate"],
-    likes: 200,
-    comments: 30,
-  },
-];
-
 export default function Home() {
-
   const [news, setNews] = useState<NewsCardProps[]>([]);
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef<IntersectionObserver>();
+
+  const lastNewsElementRef = useCallback((node: HTMLDivElement) => {
+    if (loading) return;
+
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore]);
 
   useEffect(() => {
     const loadNews = async () => {
-      const fetchedNews = await fetchNews();
-      setNews(fetchedNews);
+      setLoading(true);
+      try {
+        const newNews = await fetchNews(page);
+        if (newNews.length === 0) {
+          setHasMore(false);
+        } else {
+          setNews(prev => [...prev, ...newNews]);
+        }
+      } catch (error) {
+        console.error("Error loading news:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    loadNews();
-  }, []);
 
-  //useAuthRedirect(); //use this is routeguard doesnt work
+    loadNews();
+  }, [page]);
+
   return (
     <>
       <NavBar />
@@ -56,27 +53,33 @@ export default function Home() {
       <RouteGuard>
         <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
           {news.map((newsItem, index) => (
-            <NewsCard
+            <div
               key={index}
-              avatarUrl={newsItem.avatarUrl}
-              avatarFallback={newsItem.avatarFallback}
-              userName={newsItem.userName}
-              date={newsItem.date}
-              title={newsItem.title}
-              description={newsItem.description}
-              imageUrl={newsItem.imageUrl}
-              urlToImage = {newsItem.imageUrl}
-              categories={newsItem.categories}
-              likes={newsItem.likes}
-              comments={newsItem.comments}
-            />
+              ref={index === news.length - 1 ? lastNewsElementRef : null}
+            >
+              <NewsCard
+                avatarUrl={newsItem.avatarUrl}
+                avatarFallback={newsItem.avatarFallback}
+                userName={newsItem.userName}
+                date={newsItem.date}
+                title={newsItem.title}
+                description={newsItem.description}
+                imageUrl={newsItem.imageUrl}
+                urlToImage={newsItem.imageUrl}
+                sourceUrl={newsItem.sourceUrl}
+                categories={newsItem.categories}
+                likes={newsItem.likes}
+                comments={newsItem.comments}
+              />
+            </div>
           ))}
+          {loading && (
+            <div className="col-span-full flex justify-center p-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+            </div>
+          )}
         </div>
       </RouteGuard>
     </>
   );
 }
-function setNewsList(news: NewsCardProps[]) {
-  throw new Error("Function not implemented.");
-}
-

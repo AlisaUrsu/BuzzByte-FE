@@ -11,6 +11,7 @@ type NewsModalProps = {
   title: string;
   description: string;
   urlToImage?: string;
+  sourceUrl: string;
   categories: string[];
   comments: Comment[];
   onAddComment: (comment: Omit<Comment, 'id' | 'createdAt' | 'likes'>) => void;
@@ -28,6 +29,7 @@ export function NewsModal({
   title,
   description,
   urlToImage,
+  sourceUrl,
   categories,
   onAddComment,
   postId,
@@ -70,11 +72,34 @@ export function NewsModal({
 
         {/* Image */}
         {urlToImage && (
-          <img
-            src={urlToImage}
-            alt="News Image"
-            className="w-full h-64 object-cover rounded-lg mb-6"
-          />
+          <div className="space-y-4 mb-6">
+            <img
+              src={urlToImage}
+              alt="News Image"
+              className="w-full h-64 object-cover rounded-lg"
+            />
+            <a 
+              href={sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors"
+            >
+              Read Full Article
+              <svg 
+                className="w-4 h-4 ml-2" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" 
+                />
+              </svg>
+            </a>
+          </div>
         )}
 
         {/* Categories */}

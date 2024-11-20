@@ -13,12 +13,20 @@ import { useState } from "react";
 import { NewsCardProps } from "./NewsCard";
 import { fetchNews } from "@/services/newsService";
 import { NewsModal } from "./NewsModal";
+import { useRouter } from "next/navigation";
 
 const NavBar: React.FC = () => {
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState<NewsCardProps[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedNews, setSelectedNews] = useState<NewsCardProps | null>(null);
+
+    const router = useRouter();
+
+    const handleNewPostClick = () => {
+        router.push("/add");
+    };
+
 
     const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -62,15 +70,13 @@ const NavBar: React.FC = () => {
             </NavigationMenuList>
 
             <NavigationMenuList className="flex-1 mx-8 relative">
-                <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-full">
-                    <Search className="text-gray-500 mr-2 flex-shrink-0" />
+                    <Search className="absolute left-2.5 top-2.5 h-5 w-5 text-muted-foreground" />
                     <Input
                         placeholder="Search"
                         value={query}
                         onChange={handleSearch}
-                        className="bg-transparent border-none outline-none text-black placeholder-gray-500 w-full focus:ring-0"
+                        className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
                     />
-                </div>
 
                 {searchResults.length > 0 && (
                     <div className="absolute top-full left-0 w-full bg-white shadow-lg rounded-lg mt-2 z-50 max-h-60 overflow-y-auto">
@@ -90,7 +96,8 @@ const NavBar: React.FC = () => {
 
             <NavigationMenuList className="flex items-center space-x-4 w-[180px] justify-end pr-2">
                 <NavigationMenuItem>
-                    <Button className="bg-black text-white font-semibold rounded px-4 py-1">
+                    <Button className="bg-black text-white font-semibold rounded px-4 py-1" onClick={handleNewPostClick}
+                    >
                         New Post
                     </Button>
                 </NavigationMenuItem>

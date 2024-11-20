@@ -51,7 +51,7 @@ export default function Home() {
       <NavBar />
       <br />
       <RouteGuard>
-        <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 ml-6 mr-6">
           {news.map((newsItem, index) => (
             <div
               key={index}
@@ -80,6 +80,7 @@ export default function Home() {
           )}
         </div>
       </RouteGuard>
+
     </>
   );
 }

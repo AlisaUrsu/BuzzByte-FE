@@ -8,10 +8,10 @@ import { useState } from "react";
 type PostCardProps = {
   avatarUrl: string;
   avatarFallback: string;
-  userName: string;
+  username: string;
   date: string;
   title: string;
-  description: string;
+  content: string;
   categories: string[];
   likes: number;
   comments: number;
@@ -22,7 +22,7 @@ export function PostCard({
     avatarFallback,
     date,
     title,
-    description,
+    content,
     categories,
     likes,
     comments,
@@ -60,7 +60,7 @@ export function PostCard({
         <CardContent className="">
           <CardTitle className="font-bold text-lg">{title}</CardTitle>
           <CardDescription className="text-sm text-muted-foreground line-clamp-3 mt-2">
-            {description}
+            {content}
           </CardDescription>
   
           <div className="mt-3 flex flex-wrap gap-2">

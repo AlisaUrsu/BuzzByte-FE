@@ -33,61 +33,46 @@ import {
 import {
   Textarea
 } from "@/components/ui/textarea"
-import {
-  MultiSelector,
-  MultiSelectorContent,
-  MultiSelectorInput,
-  MultiSelectorItem,
-  MultiSelectorList,
-  MultiSelectorTrigger
-} from "@/components/ui/extension/multi-select"
-import {
-  CloudUpload,
-  Paperclip
-} from "lucide-react"
-import {
-  FileInput,
-  FileUploader,
-  FileUploaderContent,
-  FileUploaderItem
-} from "@/components/ui/extension/file-upload"
+import TagsSelector from "@/components/form/TagsSelector"
 import ImageUploadDropzone from "@/components/form/ImageUploadDropzone"
-
+import { addPost } from "@/services/postService"
+;
 const formSchema = z.object({
   title_input: z.string().nonempty("Title is required"),
-  description_textarea: z.string(),
+  content_textarea: z.string(),
   tags_menu: z.array(z.string()).nonempty("Please at least one item"),
   image_input: z.string().optional()
 });
 
-export default function MyForm() {
 
+
+export default function MyForm() {
   const [files, setFiles] = useState < File[] | null > (null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const form = useForm < z.infer < typeof formSchema >> ({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      "tags_menu": ["React"]
-    },
   })
 
   const handleImageUrlChange = (url: string) => {
     form.setValue("image_input", url);
   };
 
-  function onSubmit(values: z.infer < typeof formSchema > ) {
+  const handleTagChange = (newSelectedTags: string[]) => {
+    setSelectedTags(newSelectedTags); // Update internal state
+    form.setValue("tags_menu", newSelectedTags); // Sync with react-hook-form
+  };
+
+  async function onSubmit(values: z.infer < typeof formSchema > ) {
     console.log(files);
-    const entity = {
-      userName: "currentLoggedUser",
-      date: new Date().toISOString(),
+    const post = {
       title: values.title_input,
-      description: values.description_textarea,
-      imageUrl: files?.length ? URL.createObjectURL(files[0]) : "",
-      categories: values.tags_menu,
-      likes: 0,
-      comments: 0,
+      description: "", // Set description to an empty string as required
+      content: values.content_textarea,
+      tags: values.tags_menu,
+      image: files?.length ? URL.createObjectURL(files[0]) : undefined,
     };
-    try {
+    /*try {
       console.log(values);
       toast(
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
@@ -97,7 +82,15 @@ export default function MyForm() {
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
-    }
+    }*/
+   try {
+    const result = await addPost(post);
+    toast.success("Post added succesfully");
+    console.log(result);
+   } catch (error) {
+    console.error("Error adding post:", error);
+    toast.error("Failed to add post. Please try again.");
+   }
   }
 
   return (
@@ -125,7 +118,7 @@ export default function MyForm() {
         
         <FormField
           control={form.control}
-          name="description_textarea"
+          name="content_textarea"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Description</FormLabel>
@@ -149,23 +142,10 @@ export default function MyForm() {
                 <FormItem>
                   <FormLabel>Select your tags</FormLabel>
                   <FormControl>
-                    <MultiSelector
-                      values={field.value}
-                      onValuesChange={field.onChange}
-                      loop
-                      className="max-w-xs"
-                    >
-                      <MultiSelectorTrigger>
-                        <MultiSelectorInput placeholder="Select languages" />
-                      </MultiSelectorTrigger>
-                      <MultiSelectorContent>
-                      <MultiSelectorList>
-                        <MultiSelectorItem value={"React"}>React</MultiSelectorItem>
-                        <MultiSelectorItem value={"Vue"}>Vue</MultiSelectorItem>
-                        <MultiSelectorItem value={"Svelte"}>Svelte</MultiSelectorItem>
-                      </MultiSelectorList>
-                      </MultiSelectorContent>
-                    </MultiSelector>
+                  <TagsSelector
+                    selectedTags={selectedTags} // Pass selectedCategories
+                    setSelectedTags={handleTagChange} // Pass setSelectedCategories
+                  />
                   </FormControl>
                   <FormDescription>Select up to 5 tags.</FormDescription>
                   <FormMessage />

@@ -34,7 +34,7 @@ const ImageUploadDropzone: React.FC<ImageUploadDropzoneProps> = ({files, setFile
       onFileUrlChange(fileUrl);
       return () => URL.revokeObjectURL(fileUrl);  // Clean up URL
     }
-    //onFileUrlChange("");
+    onFileUrlChange("");
   }, [files, onFileUrlChange]);
 
   return (

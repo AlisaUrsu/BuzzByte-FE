@@ -22,7 +22,7 @@ export interface NewsApiArticle {
   
   export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
     const API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY;
-    const pageSize = 10;
+    const pageSize = 8;
     const API_URL = `https://newsapi.org/v2/top-headlines?category=technology&pageSize=${pageSize}&page=${page}&apiKey=${API_KEY}`;
   
     try {
@@ -33,8 +33,10 @@ export interface NewsApiArticle {
         throw new Error("Failed to fetch news");
       }
   
-      return data.articles.map(article => ({
-        avatarUrl: "https://avatar.iran.liara.run/public",
+      const articlesWithImages = data.articles.filter(article => article.urlToImage);
+
+      return articlesWithImages.map(article => ({
+        avatarUrl: "",
         avatarFallback: article.source.name[0],
         userName: article.source.name,
         date: new Date(article.publishedAt).toLocaleDateString(),
@@ -43,9 +45,9 @@ export interface NewsApiArticle {
         imageUrl: article.urlToImage || "",
         urlToImage: article.urlToImage || "",
         sourceUrl: article.url,
-        categories: ["Technology", article.source.name], 
-        likes: 0, 
-        comments: 0, 
+        categories: ["Technology", article.source.name],
+        likes: 0,
+        comments: 0,
       }));
     } catch (error) {
       console.error("Error fetching news:", error);

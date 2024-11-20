@@ -48,6 +48,7 @@ export interface NewsApiArticle {
         categories: ["Technology", article.source.name],
         likes: 0,
         comments: 0,
+        onHide: () => {}, // Add the missing onHide property
       }));
     } catch (error) {
       console.error("Error fetching news:", error);

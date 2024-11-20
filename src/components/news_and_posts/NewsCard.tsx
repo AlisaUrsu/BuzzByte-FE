@@ -22,6 +22,7 @@ export type NewsCardProps = {
   description: string;
   imageUrl: string;
   sourceUrl: string;
+  onHide: (sourceUrl: string) => void;
   categories: string[];
   likes: number;
   comments: number;
@@ -43,17 +44,24 @@ export function NewsCard({
   categories,
   likes,
   comments,
-}: NewsCardProps) {
+  onHide
+}: NewsCardProps & { onHide: (sourceUrl: string) => void }) {
   const [liked, setLiked] = useState(false);
   const [commented, setCommented] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const toggleModal = () => setIsModalOpen(!isModalOpen);
+  const [isHidden, setIsHidden] = useState(false);
+
 
   return (
     <>
       <Card
-        className="max-w-lg shadow-md border relative cursor-pointer"
+        className={`
+            max-w-lg shadow-md border relative cursor-pointer
+            transition-all duration-500 ease-in-out
+            ${isHidden ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}
+          `}
         onClick={toggleModal}
       >
         <CardHeader className="p-4 flex items-center justify-between">
@@ -142,15 +150,21 @@ export function NewsCard({
 
           <br />
 
-          <div className="absolute top-2 right-2">
-            <Select>
+          <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+            <Select onValueChange={(value) => {
+              if (value === 'hide') {
+                setIsHidden(true);
+                setTimeout(() => {
+                  onHide(sourceUrl);
+                }, 500);
+              }
+            }}>
               <SelectTrigger className="p-2">
                 <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
               </SelectTrigger>
               <SelectContent className="w-32">
                 <SelectItem value="share">Share</SelectItem>
                 <SelectItem value="hide">Hide</SelectItem>
-                <SelectItem value="bookmark">Bookmark</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -218,7 +232,8 @@ export function NewsCard({
                 setBookmarked(!bookmarked);
               }}
             >
-              <Bookmark className="h-5 w-5" />
+              {/* TODO - Add for next demo */}
+              {/* <Bookmark className="h-5 w-5" /> */}
             </div>
           </div>
         </CardContent>

@@ -7,7 +7,7 @@ import {useState,useEffect} from "react";
 import { NewsCard, NewsCardProps } from "../../components/news_and_posts/NewsCard";
 
 
-
+/*
 const newsList = [
   {
     avatarUrl: "https://i.pinimg.com/736x/d0/31/64/d03164b012f9a7ac5683ba646357eb72.jpg",
@@ -104,3 +104,4 @@ export default function Home() {
     </>
   );
 }
+  */

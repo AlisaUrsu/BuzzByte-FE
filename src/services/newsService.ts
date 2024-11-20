@@ -21,7 +21,7 @@ export interface NewsApiArticle {
   }
   
   export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
-    const API_KEY = "e63ed8d23a244e6c9485f32b009f7397";
+    const API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY;
     const pageSize = 10;
     const API_URL = `https://newsapi.org/v2/top-headlines?category=technology&pageSize=${pageSize}&page=${page}&apiKey=${API_KEY}`;
   

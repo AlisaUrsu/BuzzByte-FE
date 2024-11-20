@@ -9,8 +9,14 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useRouter } from "next/navigation";
 
 const NavBar: React.FC = () => {
+    const router = useRouter();
+
+    const handleNewPostClick = () => {
+        router.push("/add");
+    };
     return (
         <NavigationMenu className="flex max-w-full items-center justify-between p-4 bg-white shadow-md">
             <NavigationMenuList className="flex items-center">
@@ -20,19 +26,23 @@ const NavBar: React.FC = () => {
                 </NavigationMenuItem>
             </NavigationMenuList>
 
-            <NavigationMenuList className="flex-grow mx-12">
-                <div className="flex items-center bg-gray-100 rounded-lg px-28 py-2">
-                    <Search className="text-gray-500 mr-2 flex-shrink-0" />
-                    <Input
-                        placeholder="Search"
-                        className="bg-transparent border-none outline-none text-black placeholder-gray-500 w-full focus:ring-0 "
-                    />
+            <NavigationMenuList>
+                <div >
+                <Search className="absolute left-2.5 top-2.5 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search news..."
+                className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+              />
+
                 </div>
             </NavigationMenuList>
 
             <NavigationMenuList className="flex items-center space-x-4 w-[180px] justify-end pr-2">
                 <NavigationMenuItem>
-                    <Button className="bg-black text-white font-semibold rounded px-4 py-1">
+                    <Button className="bg-black text-white font-semibold rounded px-4 py-1"
+                            onClick={handleNewPostClick}
+                    >
                         New Post
                     </Button>
                 </NavigationMenuItem>

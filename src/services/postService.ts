@@ -108,7 +108,7 @@ export async function fetchPosts(params: FetchPostsParams): Promise<PaginatedRes
 }
 
 export async function addPost(post: AddPostDto): Promise<PostDto> {
-    const response = await fetchData(`http://localhost:8080/api/posts`,
+    const response = await fetchData(`http://localhost:8080/api/posts/demo`,
         {
             method: "POST",
             headers: {

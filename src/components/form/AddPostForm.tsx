@@ -37,6 +37,10 @@ import TagsSelector from "@/components/form/TagsSelector"
 import ImageUploadDropzone from "@/components/form/ImageUploadDropzone"
 import { addPost } from "@/services/postService"
 ;
+import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card"
+
+
 const formSchema = z.object({
   title_input: z.string().nonempty("Title is required"),
   content_textarea: z.string(),
@@ -46,12 +50,19 @@ const formSchema = z.object({
 
 
 
-export default function MyForm() {
+export default function AddPostForm() {
   const [files, setFiles] = useState < File[] | null > (null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const router = useRouter(); 
 
   const form = useForm < z.infer < typeof formSchema >> ({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      title_input: "",         
+      content_textarea: "",    
+      tags_menu: [],          
+      image_input: "",         
+    },
   })
 
   const handleImageUrlChange = (url: string) => {
@@ -59,33 +70,24 @@ export default function MyForm() {
   };
 
   const handleTagChange = (newSelectedTags: string[]) => {
-    setSelectedTags(newSelectedTags); // Update internal state
-    form.setValue("tags_menu", newSelectedTags); // Sync with react-hook-form
+    setSelectedTags(newSelectedTags);
+    form.setValue("tags_menu", newSelectedTags); 
   };
 
   async function onSubmit(values: z.infer < typeof formSchema > ) {
     console.log(files);
     const post = {
       title: values.title_input,
-      description: "", // Set description to an empty string as required
+      description: "", 
       content: values.content_textarea,
       tags: values.tags_menu,
       image: files?.length ? URL.createObjectURL(files[0]) : undefined,
     };
-    /*try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
-    } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
-    }*/
+    
    try {
     const result = await addPost(post);
     toast.success("Post added succesfully");
+    router.push("/");
     console.log(result);
    } catch (error) {
     console.error("Error adding post:", error);
@@ -95,8 +97,9 @@ export default function MyForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl mx-auto py-10">
-        
+      <form onSubmit={form.handleSubmit(onSubmit)} >
+        <Card className="max-w-3xl mx-auto p-8 bg-white rounded-lg">
+          <h1 className="text-3xl font-bold mb-4">Create Post</h1>
         <FormField
           control={form.control}
           name="title_input"
@@ -106,7 +109,6 @@ export default function MyForm() {
               <FormControl>
                 <Input 
                 placeholder=""
-                
                 type=""
                 {...field} />
               </FormControl>
@@ -143,8 +145,8 @@ export default function MyForm() {
                   <FormLabel>Select your tags</FormLabel>
                   <FormControl>
                   <TagsSelector
-                    selectedTags={selectedTags} // Pass selectedCategories
-                    setSelectedTags={handleTagChange} // Pass setSelectedCategories
+                    selectedTags={selectedTags} 
+                    setSelectedTags={handleTagChange} 
                   />
                   </FormControl>
                   <FormDescription>Select up to 5 tags.</FormDescription>
@@ -168,6 +170,7 @@ export default function MyForm() {
           )}
         />
         <Button type="submit">Submit</Button>
+        </Card>
       </form>
     </Form>
   )

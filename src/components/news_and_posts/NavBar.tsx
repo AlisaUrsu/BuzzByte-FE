@@ -14,6 +14,7 @@ import { NewsCardProps } from "./NewsCard";
 import { fetchNews } from "@/services/newsService";
 import { NewsModal } from "./NewsModal";
 import { useRouter } from "next/navigation";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 const NavBar: React.FC = () => {
     const [query, setQuery] = useState("");
@@ -27,6 +28,10 @@ const NavBar: React.FC = () => {
         router.push("/add");
     };
 
+    const handlePostsClick = () => {
+        router.push("/posts");
+        console.log("plm");
+    }
 
     const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -50,20 +55,28 @@ const NavBar: React.FC = () => {
         setQuery(""); // Clear search input
     };
 
+    const handleNewsButtonClick = () => {
+        router.push('/');
+    }
+
+    const handleMyPostsClick = () => {
+        router.push("/my-posts")
+    }
+
     return (
         <NavigationMenu className="flex max-w-full items-center justify-between p-4 bg-white shadow-md">
             <NavigationMenuList className="flex items-center space-x-6">
-                <NavigationMenuItem className="flex items-center gap-2">
-                    <img src="/buzzbytelogo.svg" alt="logo" className="h-10" />
-                    <span className="font-bold text-gray-800 text-xl">BuzzByte</span>
+                <NavigationMenuItem className="flex items-center gap-2" onClick={handleNewsButtonClick}>
+                    <img src="/buzzbytelogo.svg" alt="logo" className="h-10 cursor-pointer" />
+                    <span className="font-bold text-gray-800 text-xl cursor-pointer">BuzzByte</span>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                    <button className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                    <button className="text-gray-600 hover:text-gray-900 font-medium transition-colors" onClick={handleNewsButtonClick}>
                         News
                     </button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                    <button className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                    <button className="text-gray-600 hover:text-gray-900 font-medium transition-colors" onClick={handlePostsClick}>
                         Posts
                     </button>
                 </NavigationMenuItem>
@@ -102,10 +115,21 @@ const NavBar: React.FC = () => {
                     </Button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                    <Avatar className="rounded-full w-8 h-8">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <Avatar className="rounded-full w-8 h-8 cursor-pointer">
                         <AvatarImage src="https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg" />
                         <AvatarFallback>NA</AvatarFallback>
                     </Avatar>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleMyPostsClick}>My Posts</DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">Logout</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                
                 </NavigationMenuItem>
             </NavigationMenuList>
 

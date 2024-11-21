@@ -32,6 +32,7 @@ export type NewsCardProps = {
 
 import { NewsModal } from "./NewsModal";
 import { Comment } from "./NewsComments";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 
 export function NewsCard({
@@ -223,23 +224,32 @@ export function NewsCard({
           </div>
 
           <br />
+          
+<div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <button className="p-1">
+        <MoreHorizontal className="h-5 w-5 cursor-pointer text-muted-foreground" />
+      </button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-32">
+      <DropdownMenuItem 
+        className="cursor-pointer" 
+        onSelect={() => handleHide()}
+      >
+        Hide
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem 
+        className="cursor-pointer" 
+        onSelect={() => setIsShareModalOpen(true)}
+      >
+        Share
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+</div>
 
-          <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
-            <Select onValueChange={(value) => {
-              if (value === 'hide') {
-                handleHide();
-              } else if (value === 'share') {
-                setIsShareModalOpen(true);
-              }
-            }}>
-              <SelectTrigger className="p-2">
-                <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="share">Share</SelectItem>
-                <SelectItem value="hide">Hide</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </CardHeader>
 

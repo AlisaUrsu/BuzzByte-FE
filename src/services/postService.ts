@@ -83,7 +83,7 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
 }
 
 export async function fetchPosts(params: FetchPostsParams): Promise<PaginatedResponse<PostDto>> {
-    const { pageNumber = 0, pageSize = 8, postId, postTitle, postContent, postAuthor, postTags } = params;
+    const { pageNumber, pageSize, postId, postTitle, postContent, postAuthor, postTags } = params;
 
     const queryParams = new URLSearchParams({
         pageNumber: pageNumber.toString(),
@@ -98,7 +98,7 @@ export async function fetchPosts(params: FetchPostsParams): Promise<PaginatedRes
         postTags.forEach((tag) => queryParams.append("postTags", tag));
     }
 
-    const endpoint = `/api/posts?${queryParams.toString()}`;
+    const endpoint = `http://localhost:8080/api/posts?${queryParams.toString()}`;
     const response = await fetchData(endpoint,
         {
             method: "GET"
@@ -116,6 +116,36 @@ export async function addPost(post: AddPostDto): Promise<PostDto> {
             },
             body: JSON.stringify(post),
         });
+    const result: Result<PostDto> = await response.json();
+    return result.data;
+}
+
+export async function updatePost(post: AddPostDto, postId: number): Promise<PostDto> {
+    const response = await fetchData(`http://localhost:8080/api/posts/demo/` + postId,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(post),
+        }
+    );
+    const result: Result<PostDto> = await response.json();
+    return result.data;
+}
+
+export async function deletePost(postId: number) {
+    await fetchData(`http://localhost:8080/api/posts/` + postId, {
+        method: "DELETE"
+    });
+}
+
+export async function fetchPostById(postId: number): Promise<PostDto> {
+    const response = await fetchData(`http://localhost:8080/api/posts/` + postId,
+        {
+            method: "GET"
+        }
+    );
     const result: Result<PostDto> = await response.json();
     return result.data;
 }

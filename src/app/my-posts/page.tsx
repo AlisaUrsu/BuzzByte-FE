@@ -3,8 +3,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import NavBar from "@/components/news_and_posts/NavBar";
 
-import { fetchPosts, PostDto } from "@/services/postService";
+import { fetchPosts, PostDto, deletePost } from "@/services/postService";
 import { PostNoImageCard } from "@/components/news_and_posts/PostNoImageCard";
+import { MyPostNoImageCard } from "@/components/news_and_posts/MyPostNoImageCard";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -31,11 +33,8 @@ export default function Home() {
     const loadPosts = async () => {
       setLoading(true);
       try {
-        const newPosts = await fetchPosts({pageNumber: page, pageSize: 100});
-        
-          setPosts(newPosts.items);
-         // console.log(newPosts.items[0].userDto.username);
-      
+        const newPosts = await fetchPosts({pageNumber: page, pageSize: 10, postAuthor: "buzz_dev"});
+        setPosts(newPosts.items);
       } catch (error) {
         console.error("Error loading posts:", error);
       } finally {
@@ -45,17 +44,34 @@ export default function Home() {
 
     loadPosts();
   }, [page]);
+
+  const handleDeletePost = (postId: number) => {
+    setPosts(posts => posts.filter(post => post.id !== postId));
+  };
   
   return (
     <>
     <NavBar />
     <br />
-      <div className="max-w-3xl mx-auto mb-12">
-        {posts.map((post, index) => (
-         
-        
-          <PostNoImageCard
+      <div className="max-w-3xl mx-auto">
+        {posts.length === 0 ? (
+        <div
+        className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
+        <div className="flex flex-col items-center gap-1 text-center">
+          <h3 className="text-2xl font-bold tracking-tight">
+            You have no posts publicated
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            You can start sharing content by creating your first post.
+          </p>
+          <Button className="mt-4">Create Post</Button>
+        </div>
+      </div>) :
+        (posts.map((post) => (
+          
+          <MyPostNoImageCard
             key={post.id}
+            postId={post.id.toString()}
             avatarUrl={"https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg"}
             avatarFallback={post.userDto.username}
             username={post.userDto.username}
@@ -65,9 +81,9 @@ export default function Home() {
             categories={post.tags.map(tag => tag.name)}
             likes={post.likes}
             comments={post.comments? post.comments.length : 0}
+            onDelete={handleDeletePost}
           />
-          
-        ))}
+        )))}
       </div>
     </>
   );

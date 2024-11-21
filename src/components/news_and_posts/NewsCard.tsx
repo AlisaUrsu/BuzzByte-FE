@@ -30,6 +30,7 @@ export type NewsCardProps = {
 
 import { NewsModal } from "./NewsModal";
 import { Comment } from "./NewsComments";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 export function NewsCard({
   avatarUrl,
@@ -143,16 +144,18 @@ export function NewsCard({
           <br />
 
           <div className="absolute top-2 right-2">
-            <Select>
-              <SelectTrigger className="p-2">
-                <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="share">Share</SelectItem>
-                <SelectItem value="hide">Hide</SelectItem>
-                <SelectItem value="bookmark">Bookmark</SelectItem>
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <button className="p-1">
+                    <MoreHorizontal className="h-5 w-5 cursor-pointer" />
+                </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                <DropdownMenuItem className="cursor-pointer">Hide</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">Share</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
           </div>
         </CardHeader>
 

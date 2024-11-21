@@ -86,12 +86,12 @@ export default function AddPostForm() {
     
    try {
     const result = await addPost(post);
-    toast.success("Post added succesfully");
+    //toast.success("Post added succesfully");
     router.push("/");
     console.log(result);
    } catch (error) {
     console.error("Error adding post:", error);
-    toast.error("Failed to add post. Please try again.");
+   // toast.error("Failed to add post. Please try again.");
    }
   }
 
@@ -127,7 +127,7 @@ export default function AddPostForm() {
               <FormControl>
                 <Textarea
                   placeholder="Share your thoughts"
-                  className="resize-none"
+                  className="resize-y"
                   {...field}
                 />
               </FormControl>

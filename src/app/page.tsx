@@ -35,7 +35,11 @@ export default function Home() {
         if (newNews.length === 0) {
           setHasMore(false);
         } else {
-          setNews(prev => [...prev, ...newNews]);
+          setNews(prev => {
+            const uniqueNews = new Map(prev.map(item => [item.sourceUrl, item]));
+            newNews.forEach(item => uniqueNews.set(item.sourceUrl, item));
+            return Array.from(uniqueNews.values());
+          });
         }
       } catch (error) {
         console.error("Error loading news:", error);
@@ -51,33 +55,37 @@ export default function Home() {
     setHiddenUrls(prev => new Set([...prev, sourceUrl]));
     setNews(prevNews => prevNews.filter(item => item.sourceUrl !== sourceUrl));
   }, []);
+
   return (
     <>
       <NavBar />
       <br />
       <RouteGuard>
         <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 ml-6 mr-6">
-          {news.map((newsItem, index) => (
-            <div
-              key={newsItem.sourceUrl}
-              ref={index === news.length - 1 ? lastNewsElementRef : null}
-            >
-              <NewsCard
-                avatarUrl={newsItem.avatarUrl}
-                avatarFallback={newsItem.avatarFallback}
-                userName={newsItem.userName}
-                date={newsItem.date}
-                title={newsItem.title}
-                description={newsItem.description}
-                imageUrl={newsItem.imageUrl}
-                urlToImage={newsItem.imageUrl}
-                sourceUrl={newsItem.sourceUrl}
-                categories={newsItem.categories}
-                likes={newsItem.likes}
-                comments={newsItem.comments}
-                onHide={hideNews} />
-            </div>
-          ))}
+          {news
+            .filter(newsItem => !hiddenUrls.has(newsItem.sourceUrl))
+            .map((newsItem, index) => (
+              <div
+                key={newsItem.sourceUrl}
+                ref={index === news.length - 1 ? lastNewsElementRef : null}
+              >
+                <NewsCard
+                  avatarUrl={newsItem.avatarUrl}
+                  avatarFallback={newsItem.avatarFallback}
+                  userName={newsItem.userName}
+                  date={newsItem.date}
+                  title={newsItem.title}
+                  description={newsItem.description}
+                  imageUrl={newsItem.imageUrl}
+                  urlToImage={newsItem.imageUrl}
+                  sourceUrl={newsItem.sourceUrl}
+                  categories={newsItem.categories}
+                  likes={newsItem.likes}
+                  comments={newsItem.comments}
+                  onHide={hideNews}
+                />
+              </div>
+            ))}
           {loading && (
             <div className="col-span-full flex justify-center p-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
@@ -85,7 +93,6 @@ export default function Home() {
           )}
         </div>
       </RouteGuard>
-
     </>
   );
 }

@@ -20,7 +20,13 @@ interface NewsApiResponse {
   articles: NewsApiArticle[];
 }
 
+const newsCache: { [key: number]: NewsCardProps[] } = {};
+
 export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
+  if (newsCache[page]) {
+    return newsCache[page];
+  }
+
   const API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY;
   const pageSize = 8;
   const API_URL = `https://newsapi.org/v2/top-headlines?category=technology&pageSize=${pageSize}&page=${page}&apiKey=${API_KEY}`;
@@ -45,7 +51,7 @@ export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
       }
     });
 
-    return uniqueArticles.map(article => ({
+    const newsData = uniqueArticles.map(article => ({
       avatarUrl: "",
       avatarFallback: article.source.name[0],
       userName: article.source.name,
@@ -58,8 +64,12 @@ export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
       categories: ["Technology", article.source.name],
       likes: 0,
       comments: 0,
-      onHide: () => { },
+      onHide: () => {}, 
     }));
+
+    newsCache[page] = newsData;
+
+    return newsData;
   } catch (error) {
     console.error("Error fetching news:", error);
     return [];

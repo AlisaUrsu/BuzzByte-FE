@@ -10,8 +10,9 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { Select, SelectTrigger, SelectContent, SelectItem } from "../ui/select";
-import { MoreHorizontal, Heart, MessageCircle, Bookmark } from "lucide-react";
+import { MoreHorizontal, Heart, MessageCircle, Bookmark, Twitter, Facebook, Linkedin, Link as LinkIcon } from "lucide-react";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export type NewsCardProps = {
   avatarUrl: string;
@@ -22,6 +23,7 @@ export type NewsCardProps = {
   description: string;
   imageUrl: string;
   sourceUrl: string;
+  onHide: (sourceUrl: string) => void;
   categories: string[];
   likes: number;
   comments: number;
@@ -31,6 +33,7 @@ export type NewsCardProps = {
 import { NewsModal } from "./NewsModal";
 import { Comment } from "./NewsComments";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
 
 export function NewsCard({
   avatarUrl,
@@ -44,17 +47,96 @@ export function NewsCard({
   categories,
   likes,
   comments,
-}: NewsCardProps) {
+  onHide
+}: NewsCardProps & { onHide: (sourceUrl: string) => void }) {
   const [liked, setLiked] = useState(false);
   const [commented, setCommented] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const toggleModal = () => setIsModalOpen(!isModalOpen);
+  const [isHidden, setIsHidden] = useState(false);
+
+  const handleHide = () => {
+    setIsHidden(true);
+    setTimeout(() => onHide(sourceUrl), 500); // Delay to allow fade-out animation
+  };
+
+  const ShareModal = ({ isOpen, onClose, title, sourceUrl }: {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    sourceUrl: string;
+  }) => {
+    const shareUrls = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(sourceUrl)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(sourceUrl)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(sourceUrl)}`
+    };
+
+    const copyToClipboard = async () => {
+      await navigator.clipboard.writeText(sourceUrl);
+      toast({
+        title: "Link copied!",
+        description: "The article link has been copied to your clipboard.",
+      });
+    };
+
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Article</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 p-4">
+            <a
+              href={shareUrls.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 p-2 rounded-lg bg-[#1DA1F2] text-white hover:bg-opacity-90"
+            >
+              <Twitter className="h-5 w-5" />
+              <span>Twitter</span>
+            </a>
+            <a
+              href={shareUrls.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 p-2 rounded-lg bg-[#4267B2] text-white hover:bg-opacity-90"
+            >
+              <Facebook className="h-5 w-5" />
+              <span>Facebook</span>
+            </a>
+            <a
+              href={shareUrls.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 p-2 rounded-lg bg-[#0077B5] text-white hover:bg-opacity-90"
+            >
+              <Linkedin className="h-5 w-5" />
+              <span>LinkedIn</span>
+            </a>
+            <button
+              onClick={copyToClipboard}
+              className="flex items-center justify-center gap-2 p-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+            >
+              <LinkIcon className="h-5 w-5" />
+              <span>Copy Link</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   return (
     <>
       <Card
-        className="max-w-lg shadow-md border relative cursor-pointer"
+        className={`
+            max-w-lg shadow-md border relative cursor-pointer
+            transition-all duration-500 ease-in-out
+            ${isHidden ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}
+          `}
         onClick={toggleModal}
       >
         <CardHeader className="p-4 flex items-center justify-between">
@@ -142,20 +224,32 @@ export function NewsCard({
           </div>
 
           <br />
+          
+<div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <button className="p-1">
+        <MoreHorizontal className="h-5 w-5 cursor-pointer text-muted-foreground" />
+      </button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-32">
+      <DropdownMenuItem 
+        className="cursor-pointer" 
+        onSelect={() => handleHide()}
+      >
+        Hide
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem 
+        className="cursor-pointer" 
+        onSelect={() => setIsShareModalOpen(true)}
+      >
+        Share
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+</div>
 
-          <div className="absolute top-2 right-2">
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                <button className="p-1">
-                    <MoreHorizontal className="h-5 w-5 cursor-pointer" />
-                </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                <DropdownMenuItem className="cursor-pointer">Hide</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">Share</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
           </div>
         </CardHeader>
 
@@ -221,7 +315,8 @@ export function NewsCard({
                 setBookmarked(!bookmarked);
               }}
             >
-              <Bookmark className="h-5 w-5" />
+              {/* TODO - Add for next demo */}
+              {/* <Bookmark className="h-5 w-5" /> */}
             </div>
           </div>
         </CardContent>
@@ -238,9 +333,18 @@ export function NewsCard({
         description={description}
         urlToImage={urlToImage}
         sourceUrl={sourceUrl}
-        categories={categories} comments={[]} onAddComment={function (comment: Omit<Comment, "id" | "createdAt" | "likes">): void {
-          throw new Error("Function not implemented.");
-        }} postId={""} />
+        categories={categories}
+        comments={[]}
+        onAddComment={() => {}}
+        postId="1"
+      />
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        title={title}
+        sourceUrl={sourceUrl}
+      />
     </>
   );
 }

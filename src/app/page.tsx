@@ -11,6 +11,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver>();
+  const [hiddenUrls, setHiddenUrls] = useState<Set<string>>(new Set());
 
   const lastNewsElementRef = useCallback((node: HTMLDivElement) => {
     if (loading) return;
@@ -46,6 +47,10 @@ export default function Home() {
     loadNews();
   }, [page]);
 
+  const hideNews = useCallback((sourceUrl: string) => {
+    setHiddenUrls(prev => new Set([...prev, sourceUrl]));
+    setNews(prevNews => prevNews.filter(item => item.sourceUrl !== sourceUrl));
+  }, []);
   return (
     <>
       <NavBar />
@@ -54,7 +59,7 @@ export default function Home() {
         <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 ml-6 mr-6">
           {news.map((newsItem, index) => (
             <div
-              key={index}
+              key={newsItem.sourceUrl}
               ref={index === news.length - 1 ? lastNewsElementRef : null}
             >
               <NewsCard
@@ -70,7 +75,7 @@ export default function Home() {
                 categories={newsItem.categories}
                 likes={newsItem.likes}
                 comments={newsItem.comments}
-              />
+                onHide={hideNews} />
             </div>
           ))}
           {loading && (

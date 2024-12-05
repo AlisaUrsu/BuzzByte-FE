@@ -8,7 +8,8 @@ export interface UserDto {
     id: number;
     username: string;
     email: string;
-    role: string; // Use a specific enum if your roles are predefined
+    role: string;
+    tags: TagDto[];
 }
 
 export interface PostCommentDto {
@@ -65,7 +66,7 @@ interface FetchPostsParams {
 }
 
 
-async function fetchData(input: RequestInfo, init?: RequestInit) {
+export async function fetchData(input: RequestInfo, init?: RequestInit) {
     const response = await fetch(input, init);
     if (response.ok) {
         return response;
@@ -82,6 +83,22 @@ async function fetchData(input: RequestInfo, init?: RequestInit) {
     }
 }
 
+// for requests that require a bearer token (pretty much everything except the '/auth' endpoints)
+export async function fetchWithAuth(input: RequestInfo, init?: RequestInit) {
+    const token = localStorage.getItem('authToken');
+
+    if (token) {
+        init = init || {};
+        init.headers = {
+            ...init.headers,
+            Authorization: `Bearer ${token}`,
+        };
+    }
+
+    return fetchData(input, init);
+}
+
+// get posts with pagination and different filters 
 export async function fetchPosts(params: FetchPostsParams): Promise<PaginatedResponse<PostDto>> {
     const { pageNumber, pageSize, postId, postTitle, postContent, postAuthor, postTags } = params;
 
@@ -99,7 +116,7 @@ export async function fetchPosts(params: FetchPostsParams): Promise<PaginatedRes
     }
 
     const endpoint = `http://localhost:8080/api/posts?${queryParams.toString()}`;
-    const response = await fetchData(endpoint,
+    const response = await fetchWithAuth(endpoint,
         {
             method: "GET"
         });
@@ -108,7 +125,7 @@ export async function fetchPosts(params: FetchPostsParams): Promise<PaginatedRes
 }
 
 export async function addPost(post: AddPostDto): Promise<PostDto> {
-    const response = await fetchData(`http://localhost:8080/api/posts/demo`,
+    const response = await fetchWithAuth(`http://localhost:8080/api/posts`,
         {
             method: "POST",
             headers: {
@@ -121,7 +138,7 @@ export async function addPost(post: AddPostDto): Promise<PostDto> {
 }
 
 export async function updatePost(post: AddPostDto, postId: number): Promise<PostDto> {
-    const response = await fetchData(`http://localhost:8080/api/posts/demo/` + postId,
+    const response = await fetchWithAuth(`http://localhost:8080/api/posts/` + postId,
         {
             method: "PUT",
             headers: {
@@ -135,13 +152,13 @@ export async function updatePost(post: AddPostDto, postId: number): Promise<Post
 }
 
 export async function deletePost(postId: number) {
-    await fetchData(`http://localhost:8080/api/posts/` + postId, {
+    await fetchWithAuth(`http://localhost:8080/api/posts/` + postId, {
         method: "DELETE"
     });
 }
 
 export async function fetchPostById(postId: number): Promise<PostDto> {
-    const response = await fetchData(`http://localhost:8080/api/posts/` + postId,
+    const response = await fetchWithAuth(`http://localhost:8080/api/posts/` + postId,
         {
             method: "GET"
         }

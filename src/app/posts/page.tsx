@@ -5,6 +5,7 @@ import NavBar from "@/components/news_and_posts/NavBar";
 
 import { fetchPosts, PostDto } from "@/services/postService";
 import { PostNoImageCard } from "@/components/news_and_posts/PostNoImageCard";
+import { getUser } from "@/services/authenticationService";
 
 export default function Home() {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -31,7 +32,9 @@ export default function Home() {
     const loadPosts = async () => {
       setLoading(true);
       try {
-        const newPosts = await fetchPosts({pageNumber: page, pageSize: 100});
+        const currentUser = await getUser();
+        const tagNames = currentUser.tags.map(tag => tag.name);
+        const newPosts = await fetchPosts({pageNumber: page, pageSize: 100, postTags: tagNames});
         
           setPosts(newPosts.items);
          // console.log(newPosts.items[0].userDto.username);
@@ -51,6 +54,11 @@ export default function Home() {
     <NavBar />
     <br />
       <div className="max-w-3xl mx-auto mb-12">
+      {loading  && (
+            <div className="col-span-full flex justify-center p-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+            </div>
+          )}
         {posts.map((post, index) => (
          
         
@@ -68,6 +76,7 @@ export default function Home() {
           />
           
         ))}
+      
       </div>
     </>
   );

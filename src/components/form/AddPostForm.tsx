@@ -39,6 +39,7 @@ import { addPost } from "@/services/postService"
 ;
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card"
+import { register, enableUser, getRandomPassword, login, logout, requestPasswordReset, resetPassword, getUser, changePassword, addTagsToUser, modifyUser} from "@/services/authenticationService"
 
 
 const formSchema = z.object({
@@ -86,7 +87,6 @@ export default function AddPostForm() {
     
    try {
     const result = await addPost(post);
-    //toast.success("Post added succesfully");
     router.push("/");
     console.log(result);
    } catch (error) {

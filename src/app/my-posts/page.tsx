@@ -7,6 +7,8 @@ import { fetchPosts, PostDto, deletePost } from "@/services/postService";
 import { PostNoImageCard } from "@/components/news_and_posts/PostNoImageCard";
 import { MyPostNoImageCard } from "@/components/news_and_posts/MyPostNoImageCard";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { getUser } from "@/services/authenticationService";
 
 export default function Home() {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -14,6 +16,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver>();
+  const router = useRouter();
 
   const lastPostsElementRef = useCallback((node: HTMLDivElement) => {
     if (loading) return;
@@ -33,7 +36,8 @@ export default function Home() {
     const loadPosts = async () => {
       setLoading(true);
       try {
-        const newPosts = await fetchPosts({pageNumber: page, pageSize: 10, postAuthor: "buzz_dev"});
+        const currentUser = await getUser();
+        const newPosts = await fetchPosts({pageNumber: page, pageSize: 10, postAuthor: currentUser.username});
         setPosts(newPosts.items);
       } catch (error) {
         console.error("Error loading posts:", error);
@@ -48,6 +52,10 @@ export default function Home() {
   const handleDeletePost = (postId: number) => {
     setPosts(posts => posts.filter(post => post.id !== postId));
   };
+
+  const handleNewPostClick = () => {
+    router.push("/add");
+};
   
   return (
     <>
@@ -64,7 +72,7 @@ export default function Home() {
           <p className="text-sm text-muted-foreground">
             You can start sharing content by creating your first post.
           </p>
-          <Button className="mt-4">Create Post</Button>
+          <Button className="mt-4" onClick={handleNewPostClick}>Create Post</Button>
         </div>
       </div>) :
         (posts.map((post) => (
@@ -84,6 +92,7 @@ export default function Home() {
             onDelete={handleDeletePost}
           />
         )))}
+        
       </div>
     </>
   );

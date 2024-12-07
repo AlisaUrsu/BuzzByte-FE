@@ -4,6 +4,14 @@ import NavBar from "../components/news_and_posts/NavBar";
 import { NewsCard, NewsCardProps } from "../components/news_and_posts/NewsCard";
 import { RouteGuard } from "@/components/login/route-guard";
 import { fetchNews } from "@/services/newsService";
+import NewsFiltering from "@/components/news_and_posts/NewsFiltering";
+interface FilterParams {
+  categories?: string[];
+  dateRange?: { from: Date; to: Date };
+  keyword?: string;
+  source?: string;
+  author?: string;
+}
 
 export default function Home() {
   const [news, setNews] = useState<NewsCardProps[]>([]);
@@ -12,6 +20,17 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const observer = useRef<IntersectionObserver>();
   const [hiddenUrls, setHiddenUrls] = useState<Set<string>>(new Set());
+
+  const [filters, setFilters] = useState<FilterParams>({});
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>();
+  const [keyword, setKeyword] = useState("");
+  const [selectedSource, setSelectedSource] = useState("");
+  const [selectedAuthor, setSelectedAuthor] = useState("");
+
+  const allCategories = Array.from(new Set(news.flatMap(item => item.categories)));
+  const allSources = Array.from(new Set(news.map(item => item.userName)));
+
 
   const lastNewsElementRef = useCallback((node: HTMLDivElement) => {
     if (loading) return;
@@ -31,7 +50,12 @@ export default function Home() {
     const loadNews = async () => {
       setLoading(true);
       try {
-        const newNews = await fetchNews(page);
+        const newNews = await fetchNews(page, {
+          categories: selectedCategories,
+          keyword,
+          source: selectedSource,
+          author: selectedAuthor
+        });
         if (newNews.length === 0) {
           setHasMore(false);
         } else {
@@ -49,18 +73,30 @@ export default function Home() {
     };
 
     loadNews();
-  }, [page]);
+  }, [page, selectedCategories, keyword, selectedSource, selectedAuthor]);
+
 
   const hideNews = useCallback((sourceUrl: string) => {
     setHiddenUrls(prev => new Set([...prev, sourceUrl]));
     setNews(prevNews => prevNews.filter(item => item.sourceUrl !== sourceUrl));
   }, []);
 
+  const handleFilterChange = (filters: FilterParams) => {
+    setSelectedCategories(filters.categories || []);
+    setKeyword(filters.keyword || "");
+    setSelectedSource(filters.source || "");
+  };
+
   return (
     <>
       <NavBar />
       <br />
       <RouteGuard>
+        <NewsFiltering
+          allCategories={["Tech", "AI", "Innovation"]} // Provide actual categories
+          allSources={["TechCrunch", "BBC News"]} // Provide actual sources
+          onFilterChange={handleFilterChange}
+        />
         <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 ml-6 mr-6">
           {news
             .filter(newsItem => !hiddenUrls.has(newsItem.sourceUrl))

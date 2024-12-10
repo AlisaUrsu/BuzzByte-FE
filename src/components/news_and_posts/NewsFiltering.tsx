@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,12 +42,33 @@ export default function NewsFiltering({
   onFilterChange 
 }: NewsFilteringProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [filters, setFilters] = React.useState<FilterParams>({});
+  
+  // Local state for filters
+  const [localFilters, setLocalFilters] = React.useState<FilterParams>({
+    categories: [],
+    keyword: '',
+    source: '',
+  });
 
-  const handleFilterChange = (newFilters: Partial<FilterParams>) => {
-    const updatedFilters = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
-    onFilterChange(updatedFilters);
+  const handleLocalFilterChange = (newFilters: Partial<FilterParams>) => {
+    setLocalFilters(prevFilters => ({
+      ...prevFilters,
+      ...newFilters,
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    onFilterChange(localFilters);
+    setIsOpen(false); // Close the dialog after applying filters
+  };
+
+  const handleResetFilters = () => {
+    setLocalFilters({
+      categories: [],
+      keyword: '',
+      source: '',
+    });
+    onFilterChange({}); // Reset filters in parent as well
   };
 
   return (
@@ -63,9 +85,14 @@ export default function NewsFiltering({
             <DialogTitle>Filter News</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* Categories Select */}
             <div className="space-y-2">
               <Label>Categories</Label>
-              <Select onValueChange={(value) => handleFilterChange({ categories: [value] })}>
+              <Select 
+                value={localFilters.categories?.[0] || ''}
+                onValueChange={(value) => 
+                  handleLocalFilterChange({ categories: [value] })
+                }>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
@@ -81,9 +108,15 @@ export default function NewsFiltering({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Source Select */}
             <div className="space-y-2">
               <Label>Source</Label>
-              <Select onValueChange={(value) => handleFilterChange({ source: value })}>
+              <Select 
+                value={localFilters.source || ''}
+                onValueChange={(value) => 
+                  handleLocalFilterChange({ source: value })
+                }>
                 <SelectTrigger>
                   <SelectValue placeholder="Select source" />
                 </SelectTrigger>
@@ -99,14 +132,27 @@ export default function NewsFiltering({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Keyword Input */}
             <div className="space-y-2">
               <Label>Search</Label>
               <Input
                 placeholder="Search by keyword..."
-                onChange={(e) => handleFilterChange({ keyword: e.target.value })}
+                value={localFilters.keyword}
+                onChange={(e) => 
+                  handleLocalFilterChange({ keyword: e.target.value })
+                }
               />
             </div>
           </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={handleResetFilters}>
+              Reset Filters
+            </Button>
+            <Button onClick={handleApplyFilters}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

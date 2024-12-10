@@ -21,12 +21,9 @@ export default function Home() {
   const observer = useRef<IntersectionObserver>();
   const [hiddenUrls, setHiddenUrls] = useState<Set<string>>(new Set());
 
-  const [filters, setFilters] = useState<FilterParams>({});
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>();
   const [keyword, setKeyword] = useState("");
   const [selectedSource, setSelectedSource] = useState("");
-  const [selectedAuthor, setSelectedAuthor] = useState("");
 
   const allCategories = Array.from(new Set(news.flatMap(item => item.categories)));
   const allSources = Array.from(new Set(news.map(item => item.userName)));
@@ -53,8 +50,7 @@ export default function Home() {
         const newNews = await fetchNews(page, {
           categories: selectedCategories,
           keyword,
-          source: selectedSource,
-          author: selectedAuthor
+          source: selectedSource
         });
         if (newNews.length === 0) {
           setHasMore(false);
@@ -73,7 +69,7 @@ export default function Home() {
     };
 
     loadNews();
-  }, [page, selectedCategories, keyword, selectedSource, selectedAuthor]);
+  }, [page, selectedCategories, keyword, selectedSource]);
 
 
   const hideNews = useCallback((sourceUrl: string) => {
@@ -82,6 +78,11 @@ export default function Home() {
   }, []);
 
   const handleFilterChange = (filters: FilterParams) => {
+    // Reset the news list and paging
+    setPage(1);
+    setHasMore(true);
+    setNews([]);
+  
     setSelectedCategories(filters.categories || []);
     setKeyword(filters.keyword || "");
     setSelectedSource(filters.source || "");

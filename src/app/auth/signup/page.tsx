@@ -2,8 +2,16 @@
 
 import CategoryPickPage from "@/components/login/category-pick";
 import SignUpForm from "@/components/login/signup-form";
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "recharts";
+
+import { Alert } from "@/components/ui/alert";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { enableUser, register } from "@/services/authenticationService";
 
 
 type User = {
@@ -16,13 +24,15 @@ type User = {
 // two pages, one for username email password, one for tag selection
 //todo: make it so it lasts a refresh
 export default function SignUpPage() {
-    const [page, setPage] = useState<number>(1);
+    //const [page, setPage] = useState<number>(1);
+    const pageRef = useRef<number>(1);
     const [user, setUser] = useState<User>({ username: "", password: "", email: "", categories: [] });
 
     const router = useRouter();
 
     const onNext = (username: string, email: string, password: string) => {
-        setPage(2);
+        //setPage(2);
+        pageRef.current = 2;
         setUser({
             ...user,
             username,
@@ -30,6 +40,14 @@ export default function SignUpPage() {
             password,
         });
 
+    }
+
+    const goToCategories = () => {
+        console.log("User:", user);
+        pageRef.current = 3;
+        setUser({
+            ...user,
+        });
     }
 
     const onSubmit = (categories: string[]) => {
@@ -41,22 +59,18 @@ export default function SignUpPage() {
         //here user doesnt have the categories yet
         console.log("CATEGORIES: ", categories)
         // post to backend and store in local storage the tokens + username
-        localStorage.setItem("username", user.username)
         localStorage.setItem("categories", JSON.stringify(categories))
-        router.push("/")
+        router.push("/auth/login")
     }
 
     return (
         <>
 
             <div className="w-full h-screen flex items-center justify-center px-4">
-                {page === 1 ? (
-                    <Page1 onNext={onNext} />
-                ) : (
+                {pageRef.current === 1 && <Page1 onNext={onNext} />}
+                {pageRef.current === 2 && <Page2 onNext={goToCategories} user={user} />}
+                {pageRef.current === 3 && <CategoryPickPage onSubmit={onSubmit} />}
 
-                    <CategoryPickPage onSubmit={onSubmit} />
-
-                )}
             </div>
             {/* background might have to be fixed later*/}
             <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"></div>
@@ -93,4 +107,85 @@ function Page1({ onNext }: Page1Props) {
         </div>
     );
 }
+
+type Page2Props = {
+    onNext: () => void;
+    user: User;
+}
+
+function Page2({ onNext, user }: Page2Props) {
+    const [code, setCode] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+
+        if (!code) {
+            setError('Activation code is required');
+        } else {
+            setError('');
+
+            console.log('Form submitted with code:', code);
+            try {
+                await enableUser(code);
+                alert("Account activated successfully!")
+                onNext();
+            }
+            catch {
+                setError('Invalid activation code');
+            }
+        }
+    };
+
+    useEffect(() => {
+        const fn = async () => {
+            if (user && user.email) {
+                await register(user)
+            }
+            else {
+                alert("Cannot create account without email!")
+            }
+
+        };
+        fn();
+    }, [])
+
+    return (
+        <Card className="w-full max-w-md h-[35%] ">
+            <CardHeader>
+                <CardTitle className="text-2xl">Activate your account</CardTitle>
+                <CardDescription>
+                    We've sent your activation code to {user.email}
+                </CardDescription>
+
+            </CardHeader>
+            <form className="py-12" onSubmit={handleSubmit}>
+                <CardContent className="grid gap-8">
+                    <div className="grid gap-2">
+                        <Label>Activation code</Label>
+                        <Input
+                            type="text"
+                            id="code"
+                            placeholder="Enter your code"
+                            required
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                        />
+                        {error && (
+                            <Alert variant="destructive" className="text-center">
+                                {error}
+                            </Alert>
+                        )}
+                    </div>
+                </CardContent>
+                <CardFooter>
+                    <Button type="submit" className="w-full" onSubmit={handleSubmit}>Activate</Button>
+                </CardFooter>
+            </form>
+        </Card>
+    );
+}
+
+
 

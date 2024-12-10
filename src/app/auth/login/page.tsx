@@ -34,6 +34,9 @@ export default function LoginPage() {
                                 Sign Up
                             </a>
                         </p>
+                        <a href="/auth/password/email" className="text-blue-500 hover:underline text-sm">
+                            Forgot password?
+                        </a>
                     </div>
 
                 </div>

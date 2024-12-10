@@ -12,27 +12,31 @@ export type PostNoImageCardProps = {
     avatarUrl: string;
     avatarFallback: string;
     username: string;
-    date: string;
+    createdAt: string;
     title: string;
     content: string;
     categories: string[];
     likes: number;
     comments: number;
+    updatedAt: string;
   };
 export function PostNoImageCard({
     avatarUrl,
     avatarFallback,
     username,
-    date,
+    createdAt,
     title,
     content,
     categories,
     likes,
     comments,
+    updatedAt
   }: PostNoImageCardProps) {
     const [liked, setLiked] = useState(false);
     const [commented, setCommented] = useState(false);
     const [bookmarked, setBookmarked] = useState(false);
+
+    const isEdited = createdAt !== updatedAt;
   
     return (
         <Card className="shadow-md border rounded-lg mt-2">
@@ -45,7 +49,10 @@ export function PostNoImageCard({
                     <AvatarFallback>{avatarFallback}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm font-medium">{username}</span>
-                    <div className="text-xs text-muted-foreground"><DateDisplay dateString={date}></DateDisplay></div>
+                    <div className="text-xs text-muted-foreground"><DateDisplay dateString={createdAt}></DateDisplay></div>
+                    {isEdited && (
+                      <span className="text-xs text-muted-foreground">(Edited)</span>
+                    )}
                 </div>
 
                 <DropdownMenu>

@@ -83,12 +83,13 @@ export default function Home() {
             avatarUrl={"https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg"}
             avatarFallback={post.userDto.username}
             username={post.userDto.username}
-            date={post.createdAt}
+            createdAt={post.createdAt}
             title={post.title}
             content={post.content}
             categories={post.tags.map(tag => tag.name)}
             likes={post.likes}
             comments={post.comments? post.comments.length : 0}
+            updatedAt={post.updatedAt}
             onDelete={handleDeletePost}
           />
         )))}

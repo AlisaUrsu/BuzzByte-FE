@@ -1,5 +1,6 @@
 "use client"
 import {
+  useEffect,
   useState
 } from "react"
 import {
@@ -35,7 +36,7 @@ import {
 } from "@/components/ui/textarea"
 import TagsSelector from "@/components/form/TagsSelector"
 import ImageUploadDropzone from "@/components/form/ImageUploadDropzone"
-import { addPost } from "@/services/postService"
+import { addPost, fetchTags } from "@/services/postService"
 ;
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card"
@@ -54,8 +55,8 @@ const formSchema = z.object({
 export default function AddPostForm() {
   const [files, setFiles] = useState < File[] | null > (null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const router = useRouter(); 
-
   const form = useForm < z.infer < typeof formSchema >> ({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,6 +75,18 @@ export default function AddPostForm() {
     setSelectedTags(newSelectedTags);
     form.setValue("tags_menu", newSelectedTags); 
   };
+
+  useEffect(() => {
+    async function loadTags() {
+      try {
+        const tagsDto = await fetchTags({ pageNumber: 0, pageSize: 100 });
+        setAvailableTags(tagsDto.items.map((tag) => tag.name));
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    }
+    loadTags();
+  }, []);
 
   async function onSubmit(values: z.infer < typeof formSchema > ) {
     console.log(files);
@@ -147,6 +160,7 @@ export default function AddPostForm() {
                   <TagsSelector
                     selectedTags={selectedTags} 
                     setSelectedTags={handleTagChange} 
+                    availableTags={availableTags}
                   />
                   </FormControl>
                   <FormDescription>Select up to 5 tags.</FormDescription>

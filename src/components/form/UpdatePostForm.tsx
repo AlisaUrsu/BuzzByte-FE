@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/textarea";
 import TagsSelector from "@/components/form/TagsSelector";
 import ImageUploadDropzone from "@/components/form/ImageUploadDropzone";
-import { updatePost, fetchPostById } from "@/services/postService";
+import { updatePost, fetchPostById, fetchTags } from "@/services/postService";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
 
@@ -52,6 +52,7 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   //const searchParams = useSearchParams(); 
   //const postId = searchParams.get("postId");
 
@@ -96,6 +97,16 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
         setLoading(false);
       }
     }
+    
+      async function loadTags() {
+        try {
+          const tagsDto = await fetchTags({ pageNumber: 0, pageSize: 100 });
+          setAvailableTags(tagsDto.items.map((tag) => tag.name));
+        } catch (error) {
+          console.error("Error fetching tags:", error);
+        }
+      }
+      loadTags();
 
     fetchPostData();
   }, [postId, form]);
@@ -176,6 +187,7 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
                       <TagsSelector
                         selectedTags={selectedTags}
                         setSelectedTags={handleTagChange}
+                        availableTags={availableTags}
                       />
                     </FormControl>
                     <FormDescription>Select up to 5 tags.</FormDescription>

@@ -26,12 +26,13 @@ export type PostNoImageCardProps = {
     avatarUrl: string;
     avatarFallback: string;
     username: string;
-    date: string;
+    createdAt: string;
     title: string;
     content: string;
     categories: string[];
     likes: number;
     comments: number;
+    updatedAt: string;
     onDelete: (postId: number) => void;
   };
 export function MyPostNoImageCard({
@@ -39,12 +40,13 @@ export function MyPostNoImageCard({
     avatarUrl,
     avatarFallback,
     username,
-    date,
+    createdAt,
     title,
     content,
     categories,
     likes,
     comments,
+    updatedAt,
     onDelete
   }: PostNoImageCardProps) {
     const [liked, setLiked] = useState(false);
@@ -58,6 +60,8 @@ export function MyPostNoImageCard({
         await deletePost(Number(postId));
         onDelete(Number(postId));
       };
+
+      const isEdited = createdAt !== updatedAt;
   
     return (
         <><Card className="shadow-md border rounded-lg mt-2">
@@ -70,7 +74,10 @@ export function MyPostNoImageCard({
                 <AvatarFallback>{avatarFallback}</AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium">{username}</span>
-              <div className="text-xs text-muted-foreground"><DateDisplay dateString={date}></DateDisplay></div>
+              <div className="text-xs text-muted-foreground"><DateDisplay dateString={createdAt}></DateDisplay></div>
+              {isEdited && (
+                      <span className="text-xs text-muted-foreground">(Edited)</span>
+                    )}
             </div>
             <AlertDialog>
             <DropdownMenu>

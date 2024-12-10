@@ -141,7 +141,7 @@ export default function PostPage() {
 
       </form>
       <div>
-        <h2 className="text-lg font-semibold mb-2 mt-4">Comments</h2>
+        <h2 className="text-lg font-semibold mt-4">Comments</h2>
         {comments.length > 0 ? (
           comments.map((comment) => (
             <div key={comment.id} className="-mb-2 -ml-6 -mr-6">

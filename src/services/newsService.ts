@@ -14,22 +14,61 @@ export interface NewsApiArticle {
   content: string;
 }
 
+interface FilterParams {
+  categories?: string[];
+  dateFrom?: Date;
+  dateTo?: Date;
+  keyword?: string;
+  source?: string;
+  author?: string;
+}
+
 interface NewsApiResponse {
   status: string;
   totalResults: number;
   articles: NewsApiArticle[];
 }
 
-const newsCache: { [key: number]: NewsCardProps[] } = {};
+const newsCache: { [key: string]: NewsCardProps[] } = {};
 
-export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
-  if (newsCache[page]) {
-    return newsCache[page];
+export const fetchNews = async (
+  page: number = 1,
+  filters?: FilterParams
+): Promise<NewsCardProps[]> => {
+  // Create cache key that includes filters
+  const cacheKey = `${page}-${JSON.stringify(filters)}`;
+  if (newsCache[cacheKey]) {
+    return newsCache[cacheKey];
   }
 
   const API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY;
   const pageSize = 8;
-  const API_URL = `https://newsapi.org/v2/top-headlines?category=technology&pageSize=${pageSize}&page=${page}&apiKey=${API_KEY}`;
+  
+  // Build query parameters
+  const queryParams = new URLSearchParams({
+    category: 'technology',
+    pageSize: pageSize.toString(),
+    page: page.toString(),
+    apiKey: API_KEY || ''
+  });
+
+  // Add filter parameters
+  if (filters) {
+    if (filters.keyword) {
+      queryParams.append('q', filters.keyword);
+    }
+    if (filters.source) {
+      queryParams.append('sources', filters.source);
+    }
+    if (filters.dateFrom) {
+      queryParams.append('from', filters.dateFrom.toISOString());
+    }
+    if (filters.dateTo) {
+      queryParams.append('to', filters.dateTo.toISOString());
+    }
+  }
+
+  const API_URL = `https://newsapi.org/v2/top-headlines?${queryParams.toString()}`;
 
   try {
     const response = await fetch(API_URL);
@@ -43,12 +82,20 @@ export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
 
     const uniqueUrls = new Set<string>();
     const uniqueArticles = articlesWithImages.filter(article => {
-      if (uniqueUrls.has(article.url)) {
-        return false;
-      } else {
+      // Apply additional client-side filters
+      if (uniqueUrls.has(article.url)) return false;
+      
+      const matchesCategories = !filters?.categories?.length || 
+        filters.categories.some(cat => article.source.name.includes(cat));
+      
+      const matchesAuthor = !filters?.author || 
+        article.author?.includes(filters.author);
+
+      if (matchesCategories && matchesAuthor) {
         uniqueUrls.add(article.url);
         return true;
       }
+      return false;
     });
 
     const newsData = uniqueArticles.map(article => ({
@@ -64,11 +111,10 @@ export const fetchNews = async (page: number = 1): Promise<NewsCardProps[]> => {
       categories: ["Technology", article.source.name],
       likes: 0,
       comments: 0,
-      onHide: () => {}, 
+      onHide: () => {}, // Add a default onHide function
     }));
 
-    newsCache[page] = newsData;
-
+    newsCache[cacheKey] = newsData;
     return newsData;
   } catch (error) {
     console.error("Error fetching news:", error);

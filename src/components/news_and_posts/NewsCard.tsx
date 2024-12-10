@@ -239,6 +239,7 @@ export function NewsCard({
               <SelectContent className="w-32">
                 <SelectItem value="share">Share</SelectItem>
                 <SelectItem value="hide">Hide</SelectItem>
+                <SelectItem value="bookmark">Bookmark</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -306,8 +307,7 @@ export function NewsCard({
                 setBookmarked(!bookmarked);
               }}
             >
-              {/* TODO - Add for next demo */}
-              {/* <Bookmark className="h-5 w-5" /> */}
+              <Bookmark className="h-5 w-5" />
             </div>
           </div>
         </CardContent>
@@ -326,7 +326,7 @@ export function NewsCard({
         sourceUrl={sourceUrl}
         categories={categories}
         comments={[]}
-        onAddComment={() => {}}
+        onAddComment={() => { }}
         postId="1"
       />
 

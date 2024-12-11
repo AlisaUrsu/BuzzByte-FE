@@ -127,7 +127,7 @@ export async function fetchPosts(params: FetchPostsParams): Promise<PaginatedRes
     if (endDate) queryParams.append("endDate", endDate);
 
     const endpoint = `http://localhost:8080/api/posts?${queryParams.toString()}`;
-    const response = await fetchData(endpoint,
+    const response = await fetchWithAuth(endpoint,
         {
             method: "GET"
         });
@@ -170,7 +170,7 @@ export async function deletePost(postId: number) {
 }
 
 export async function fetchPostById(postId: number): Promise<PostDto> {
-    const response = await fetchData(`http://localhost:8080/api/posts/` + postId,
+    const response = await fetchWithAuth(`http://localhost:8080/api/posts/` + postId,
         {
             method: "GET"
         }

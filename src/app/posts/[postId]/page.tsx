@@ -30,12 +30,10 @@ export default function PostPage() {
   const [bookmarked, setBookmarked] = useState(false);
   const newCommentLength = newComment.trim().length
 
-  // Fetch post data by title
   useEffect(() => {
     async function loadPost() {
       try {
         const fetchedPost = await fetchPosts({pageNumber:0, pageSize: 1, postId: Number(postId)});
-         // Replace with your API call
         setPost(fetchedPost.items[0]);
         setComments(fetchedPost.items.flatMap((post) => post.comments || []));
       } catch (error) {
@@ -44,8 +42,6 @@ export default function PostPage() {
     }
     loadPost();
   }, [postId]);
-
- 
 
   if (!post) return <p>Loading...</p>;
 

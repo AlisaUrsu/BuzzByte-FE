@@ -25,8 +25,6 @@ export type NewsCardProps = {
   sourceUrl: string;
   onHide: (sourceUrl: string) => void;
   categories: string[];
-  likes: number;
-  comments: number;
   urlToImage: string;
 };
 
@@ -45,8 +43,6 @@ export function NewsCard({
   urlToImage,
   sourceUrl,
   categories,
-  likes,
-  comments,
   onHide
 }: NewsCardProps & { onHide: (sourceUrl: string) => void }) {
   const [liked, setLiked] = useState(false);
@@ -272,33 +268,7 @@ export function NewsCard({
             ))}
           </div>
 
-          <div className="mt-4 flex justify-between items-center">
-            <div className="flex space-x-4 items-center text-muted-foreground">
-              <div
-                className={`flex items-center space-x-1 cursor-pointer ${liked ? "text-red-500" : ""
-                  }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLiked(!liked);
-                }}
-              >
-                <Heart className="h-5 w-5" />
-                <span>{likes + (liked ? 1 : 0)}</span>
-              </div>
-
-              <div
-                className={`flex items-center space-x-1 cursor-pointer ${commented ? "text-blue-500" : ""
-                  }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCommented(!commented);
-                }}
-              >
-                <MessageCircle className="h-5 w-5" />
-                <span>{comments + (commented ? 1 : 0)}</span>
-              </div>
-            </div>
-
+          <div className="mt-4 flex justify-end items-center">
             <div
               className={`cursor-pointer ${bookmarked ? "text-yellow-500" : ""
                 }`}

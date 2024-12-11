@@ -117,8 +117,6 @@ export default function Home() {
                   urlToImage={newsItem.imageUrl}
                   sourceUrl={newsItem.sourceUrl}
                   categories={newsItem.categories}
-                  likes={newsItem.likes}
-                  comments={newsItem.comments}
                   onHide={hideNews}
                 />
               </div>

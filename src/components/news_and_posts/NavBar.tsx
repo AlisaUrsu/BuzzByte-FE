@@ -112,13 +112,13 @@ const NavBar: React.FC = () => {
             </NavigationMenuList>
 
             <NavigationMenuList className="flex-1 mx-8 relative">
-                    <Search className="absolute left-2.5 top-2.5 h-5 w-5 text-muted-foreground" />
-                    <Input
-                        placeholder="Search"
-                        value={query}
-                        onChange={handleSearch}
-                        className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-                    />
+                <Search className="absolute left-2.5 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input
+                    placeholder="Search"
+                    value={query}
+                    onChange={handleSearch}
+                    className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+                />
 
                 {searchResults.length > 0 && (
                     <div className="absolute top-full left-0 w-full bg-white shadow-lg rounded-lg mt-2 z-50 max-h-60 overflow-y-auto">

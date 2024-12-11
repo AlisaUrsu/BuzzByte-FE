@@ -130,6 +130,11 @@ export async function fetchWithAuth(input: RequestInfo, init?: RequestInit) {
 export async function fetchPosts(params: FetchPostsParams): Promise<PaginatedResponse<PostDto>> {
     const { pageNumber, pageSize, postId, postTitle, postContent, postAuthor, postTags, startDate, endDate } = params;
 
+    const queryParams = new URLSearchParams({
+        pageNumber: pageNumber.toString(),
+        pageSize: pageSize.toString(),
+      });
+
     if (postId) queryParams.append("postId", postId.toString());
     if (postTitle) queryParams.append("postTitle", postTitle);
     if (postContent) queryParams.append("postContent", postContent);

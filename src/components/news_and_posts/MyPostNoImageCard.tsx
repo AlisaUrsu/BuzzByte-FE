@@ -52,6 +52,7 @@ export function MyPostNoImageCard({
     const [liked, setLiked] = useState(false);
     const router = useRouter();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
     const handleUpdateClick = () => {
         router.push(`/update/${postId}`);
     }
@@ -70,7 +71,7 @@ export function MyPostNoImageCard({
 
             <div className="flex items-center space-x-2">
               <Avatar className="w-7 h-7 rounded-full">
-                <AvatarImage className="w-7 h-7 rounded-full" src={avatarUrl} />
+                <AvatarImage className="w-7 h-7 rounded-full" src={profileImageUrl} />
                 <AvatarFallback>{avatarFallback}</AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium">{username}</span>

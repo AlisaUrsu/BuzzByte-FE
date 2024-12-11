@@ -80,7 +80,7 @@ export default function Home() {
           <MyPostNoImageCard
             key={post.id}
             postId={post.id.toString()}
-            avatarUrl={"https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg"}
+            avatarUrl={post.userDto.profilePicture}
             avatarFallback={post.userDto.username}
             username={post.userDto.username}
             createdAt={post.createdAt}

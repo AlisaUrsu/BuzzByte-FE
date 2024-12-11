@@ -11,15 +11,24 @@ export interface UserDto {
   email: string;
   role: string;
   tags: TagDto[];
+  profilePicture: string;
+}
+
+export interface AddPostCommentDto {
+  content: string;
+  postId: number;
+}
+
+export interface UpdatePostCommentDto {
+  content: string;
 }
 
 export interface PostCommentDto {
-
-    id: number;
-    content: string;
-    user: UserDto;
-    postId: number;
-    createdAt: string;
+  id: number;
+  content: string;
+  user: UserDto;
+  postId: number;
+  createdAt: string;
 }
 
 export interface PostDto {
@@ -28,7 +37,7 @@ export interface PostDto {
     content: string;
     tags: TagDto[];
     userDto: UserDto;
-    image: string;
+    image?: string;
     comments: PostCommentDto[] | null;
     likes: number;
     createdAt: string;
@@ -37,7 +46,6 @@ export interface PostDto {
 
 export interface AddPostDto {
   title: string;
-  description: string;
   content: string;
   tags: string[];
   image?: string;
@@ -58,22 +66,22 @@ export interface Result<T> {
 }
 
 interface FetchPostsParams {
-    pageNumber: number;
-    pageSize: number;
-    postId?: number;
-    postTitle?: string;
-    postContent?: string;
-    postAuthor?: string;
-    postTags?: string[];
-    startDate?: string;
-    endDate?: string;
+  pageNumber: number;
+  pageSize: number;
+  postId?: number;
+  postTitle?: string;
+  postContent?: string;
+  postAuthor?: string;
+  postTags?: string[];
+  startDate?: string;
+  endDate?: string;
 }
 
 interface FetchTagsParams {
-    pageNumber: number;
-    pageSize: number;
-    tagId?: number;
-    tagName?: string;
+  pageNumber: number;
+  pageSize: number;
+  tagId?: number;
+  tagName?: string;
 
 }
 
@@ -220,6 +228,61 @@ export async function fetchTags(params: FetchTagsParams): Promise<PaginatedRespo
         });
     const result: Result<PaginatedResponse<TagDto>> = await response.json();
     return result.data;
-    
 }
 
+export async function fetchComments(): Promise<PostCommentDto[]> {
+  const response = await fetchWithAuth("http://localhost:8080/api/comments", 
+    {
+      method: "GET"
+    });
+  const result: Result<PostCommentDto[]> = await response.json();
+  return result.data;
+}
+
+export async function fetchCommentById(commentId: number): Promise<PostCommentDto> {
+  const response = await fetchWithAuth(`http://localhost:8080/api/comments/` + commentId, 
+    {
+      method: "GET"
+    });
+  const result: Result<PostCommentDto> = await response.json();
+  return result.data;
+}
+
+export async function fetchCommentsByPostId(postId: number): Promise<PostCommentDto[]> {
+  const response = await fetchWithAuth(`http://localhost:8080/api/comments/post/` + postId, 
+    {
+      method: "GET"
+    });
+  const result: Result<PostCommentDto[]> = await response.json();
+  return result.data;
+}
+
+export async function addComment(comment: AddPostCommentDto): Promise<PostCommentDto> {
+  const response = await fetchWithAuth(`http://localhost:8080/api/comments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(comment),
+  });
+  const result: Result<PostCommentDto> = await response.json();
+  return result.data;
+}
+
+export async function updateComment(commentId: number, comment: UpdatePostCommentDto): Promise<PostCommentDto> {
+  const response = await fetchWithAuth(`http://localhost:8080/api/comments/` + commentId, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(comment),
+  });
+  const result: Result<PostCommentDto> = await response.json();
+  return result.data;
+}
+
+export async function deleteComment(commentId: number) {
+  await fetchWithAuth(`http://localhost:8080/api/posts/` + commentId, {
+    method: "DELETE",
+  });
+}

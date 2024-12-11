@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button"
+import { fetchTags } from "@/services/postService";
+import { User } from "@/app/auth/signup/page";
 
 type ButtonProps = {
     label: string;
@@ -20,40 +22,29 @@ const CategoryPickButton = ({ label, selected, onClick }: ButtonProps) => {
 };
 
 type CategoryPickPageProps = {
-    onSubmit: (categories: string[]) => void
+    onSubmit: (categories: string[]) => void,
+    user: User
 }
 
-const CategoryPickPage = ({ onSubmit }: CategoryPickPageProps) => {
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-
-    //hardcoded categories to test desgin
-
-    const categories = [
-        "JavaScript", "Python", "Java", "C#", "C++",
-        "Ruby", "Go", "Rust", "TypeScript", "PHP",
-        "Swift", "Kotlin", "Dart", "HTML & CSS",
-        "React", "Angular", "Vue.js", "Svelte", "Ember.js",
-        "Node.js", "Express.js", "Laravel", "Django", "Flask",
-        "Spring Boot", "ASP.NET",
-        "SQL", "NoSQL", "MongoDB", "PostgreSQL", "MySQL",
-        "Firebase", "GraphQL",
-        "AWS (Amazon Web Services)", "Google Cloud", "Azure",
-        "Docker", "Kubernetes", "Serverless Architecture",
-        "Continuous Integration (CI/CD)", "DevOps",
-        "Progressive Web Apps (PWAs)", "REST APIs",
-        "Microservices", "HTTP/HTTPS", "WebAssembly",
-        "Agile Methodology", "Scrum", "Kanban",
-        "Test-Driven Development (TDD)", "Pair Programming",
-        "Machine Learning", "Deep Learning", "Neural Networks",
-        "Natural Language Processing (NLP)", "Computer Vision",
-        "Reinforcement Learning",
-        "Data Science", "Data Visualization", "Big Data",
-        "Business Intelligence", "Predictive Analytics"
-    ];
+const CategoryPickPage = ({ onSubmit, user }: CategoryPickPageProps) => {
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [availableTags, setAvailableTags] = useState<string[]>([]);
+   
+    useEffect(() => {
+        async function loadTags() {
+            try {
+              const tagsDto = await fetchTags({ pageNumber: 0, pageSize: 100 });
+              setAvailableTags(tagsDto.items.map((tag) => tag.name));
+            } catch (error) {
+              console.error("Error fetching tags:", error);
+            }
+          }
+          loadTags();
+    }, []);
 
 
     const toggleCategory = (category: string) => {
-        setSelectedCategories((prev) =>
+        setSelectedTags((prev) =>
             prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
         );
     };
@@ -74,7 +65,7 @@ const CategoryPickPage = ({ onSubmit }: CategoryPickPageProps) => {
                 </div>
 
                 <div className="flex flex-wrap mb-2 h-10">
-                    {selectedCategories.map((category) => (
+                    {selectedTags.map((category) => (
                         <span key={category} className="bg-purple-900 text-white px-3 py-1 rounded-full m-1">
                             {category}
                         </span>
@@ -87,19 +78,19 @@ const CategoryPickPage = ({ onSubmit }: CategoryPickPageProps) => {
 
                 <div className="flex justify-center">
                     <div className="overflow-auto min-h-40 ">
-                        {categories.map((category) => (
+                        {availableTags.map((tag) => (
                             <CategoryPickButton
-                                key={category}
-                                label={category}
-                                selected={selectedCategories.includes(category)}
-                                onClick={() => toggleCategory(category)}
+                                key={tag}
+                                label={tag}
+                                selected={selectedTags.includes(tag)}
+                                onClick={() => toggleCategory(tag)}
                             />
                         ))}
                     </div>
                 </div>
 
                 <div className="m-5 flex justify-end">
-                    <Button type="submit" disabled={selectedCategories.length < 5} onClick={() => onSubmit(selectedCategories)}>Submit</Button>
+                    <Button type="submit" disabled={selectedTags.length < 5} onClick={() => onSubmit(selectedTags)}>Submit</Button>
                 </div>
 
             </div>

@@ -35,6 +35,7 @@ export function PostNoImageCard({
     const [liked, setLiked] = useState(false);
     const [commented, setCommented] = useState(false);
     const [bookmarked, setBookmarked] = useState(false);
+    const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
 
     const isEdited = createdAt !== updatedAt;
   
@@ -45,7 +46,7 @@ export function PostNoImageCard({
     
                 <div className="flex items-center space-x-2">
                     <Avatar className="w-7 h-7 rounded-full">
-                    <AvatarImage className="w-7 h-7 rounded-full" src={avatarUrl} />
+                    <AvatarImage className="w-7 h-7 rounded-full" src={profileImageUrl} />
                     <AvatarFallback>{avatarFallback}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm font-medium">{username}</span>

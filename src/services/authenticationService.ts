@@ -26,6 +26,7 @@ export interface ModifyUserDto {
   username: string;
   email: string;
   tags: string[];
+  profilePicture: string;
 }
 
 // sign up - dupa ce un user isi da register, va primi un email care contine un token care e folosit pt care user-ul sa fie enabled
@@ -238,6 +239,29 @@ export async function addTagsToUser(
 ): Promise<UserDto> {
   const response = await fetchWithAuth(
     `http://localhost:8080/buzzbyte/users/${userId}/tags`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(tags),
+    }
+  );
+
+  const result: Result<UserDto> = await response.json();
+  if (result.flag) {
+    return result.data;
+  } else {
+    throw new Error("Failed to add tags to user: " + result.message);
+  }
+}
+
+export async function addTagsToUserByUsername(
+  username: String,
+  tags: string[]
+): Promise<UserDto> {
+  const response = await fetchWithAuth(
+    `http://localhost:8080/buzzbyte/auth/${username}/tags`,
     {
       method: "POST",
       headers: {

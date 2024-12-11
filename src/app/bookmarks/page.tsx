@@ -1,3 +1,5 @@
+"use client"
+
 import NavBar from "@/components/news_and_posts/NavBar";
 import { NewsCard, NewsCardProps } from "@/components/news_and_posts/NewsCard";
 import React, { useState, useEffect } from "react";

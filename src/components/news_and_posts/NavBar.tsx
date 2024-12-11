@@ -158,6 +158,7 @@ const NavBar: React.FC = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="cursor-pointer" onClick={handleMyPostsClick}>My Posts</DropdownMenuItem>
                     <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/bookmarks")}>My Bookmarks</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
                 

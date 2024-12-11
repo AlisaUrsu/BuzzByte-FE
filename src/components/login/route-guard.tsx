@@ -12,8 +12,9 @@ function RouteGuard({ children }) {
         authCheck(pathname);
     }, [pathname]);
 
+
     function authCheck(url) {
-        const isAuthenticated = localStorage.getItem('username') !== null;
+        const isAuthenticated = localStorage.getItem('authToken') !== null;
         const publicPaths = ['/auth/login'];
 
         if (!isAuthenticated && !publicPaths.includes(url)) {

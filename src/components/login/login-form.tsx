@@ -16,6 +16,8 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert } from "../ui/alert"
+import { fetchData } from "@/services/postService"
+import { LoginRequest } from "@/services/authenticationService"
 
 
 export const description =
@@ -53,7 +55,7 @@ const mockFetchLogin = async (values: LoginFormData): Promise<Response> => {
 
 
 const loginSchema = z.object({
-    email: z.string().email("Invalid email format"),
+    username: z.string(),
     password: z.string().min(6, "Password must be at least 6 characters").max(200, "Password must be at most 200 characters")
 });
 
@@ -71,7 +73,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
-            email: '',
+            username: '',
             password: '',
         },
     });
@@ -81,8 +83,15 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     const onSubmit = async (values: LoginFormData) => {
 
         try {
-            // here we would have the actual fetch(backendurl, post)
-            const response = await mockFetchLogin(values);
+            const loginRequest: LoginRequest = { username: values.username, password: values.password };
+
+            const response = await fetchData(`http://localhost:8080/buzzbyte/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginRequest),
+            });
             console.log("Response received:", response);
 
             if (!response.ok) {
@@ -91,13 +100,11 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
                 throw new Error(errorData.message || "Login failed. Please try again.");
             }
 
-            const data = await response.json();
-            console.log("Login successful:", data);
+            const result = await response.json();
+            console.log("Login successful:", result);
 
-            localStorage.setItem("username", "something")
-            //localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
-            //localStorage.setItem("refreshToken", JSON.stringify(data.refreshToken));
-
+            //localStorage.setItem("username", "something")
+            localStorage.setItem('authToken', result.data);
             onLoginSuccess();
 
 
@@ -114,18 +121,18 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
             <CardHeader>
                 <CardTitle className="text-2xl">Login</CardTitle>
                 <CardDescription>
-                    Enter your email below to login to your account.
+                    Enter your username below to login to your account.
                 </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <CardContent className="grid gap-8">
 
                     <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input {...register("email")} id="email" type="email" placeholder="m@example.com" required onChange={() => clearErrors("root")} />
-                        {errors.email && (
+                        <Label htmlFor="username">Username</Label>
+                        <Input {...register("username")} id="username" type="text" required onChange={() => clearErrors("root")} />
+                        {errors.username && (
                             <Alert variant="destructive" className="text-center">
-                                {errors.email.message}
+                                {errors.username.message}
                             </Alert>
                         )}
                     </div>

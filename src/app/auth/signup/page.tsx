@@ -11,14 +11,14 @@ import { Alert } from "@/components/ui/alert";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { enableUser, register } from "@/services/authenticationService";
+import { addTagsToUserByUsername, enableUser, login, register } from "@/services/authenticationService";
 
 
-type User = {
+export type User = {
     username: string;
     email: string;
     password: string;
-    categories: string[];
+    tags: string[];
 }
 
 // two pages, one for username email password, one for tag selection
@@ -26,7 +26,7 @@ type User = {
 export default function SignUpPage() {
     //const [page, setPage] = useState<number>(1);
     const pageRef = useRef<number>(1);
-    const [user, setUser] = useState<User>({ username: "", password: "", email: "", categories: [] });
+    const [user, setUser] = useState<User>({ username: "", password: "", email: "", tags: [] });
 
     const router = useRouter();
 
@@ -50,17 +50,26 @@ export default function SignUpPage() {
         });
     }
 
-    const onSubmit = (categories: string[]) => {
+    async function onSubmit(tags: string[]) {
         setUser({
             ...user,
-            categories
+            tags: tags
         })
-
+    
         //here user doesnt have the categories yet
-        console.log("CATEGORIES: ", categories)
-        // post to backend and store in local storage the tokens + username
-        localStorage.setItem("categories", JSON.stringify(categories))
-        router.push("/auth/login")
+        await addTagsToUserByUsername(user.username, tags);
+        console.log("Tags successfully added for user:", user.username);
+
+        // Automatically log in the user
+        const loginRequest = {
+            username: user.username,
+            password: user.password, // Assuming password is already stored in the user object
+        };
+        console.log("Attempting to log in user...");
+        await login(loginRequest);
+
+        // Redirect to the home page or another relevant page
+        router.push("/");
     }
 
     return (
@@ -69,7 +78,7 @@ export default function SignUpPage() {
             <div className="w-full h-screen flex items-center justify-center px-4">
                 {pageRef.current === 1 && <Page1 onNext={onNext} />}
                 {pageRef.current === 2 && <Page2 onNext={goToCategories} user={user} />}
-                {pageRef.current === 3 && <CategoryPickPage onSubmit={onSubmit} />}
+                {pageRef.current === 3 && <CategoryPickPage user={user} onSubmit={onSubmit} />}
 
             </div>
             {/* background might have to be fixed later*/}

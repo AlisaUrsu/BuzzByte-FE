@@ -29,6 +29,8 @@ export default function PostPage() {
   const [commented, setCommented] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const newCommentLength = newComment.trim().length
+  const authorProfileImageUrl = `data:image/jpeg;base64,${post?.userDto.profilePicture}`;
+
 
   useEffect(() => {
     async function loadPost() {
@@ -55,7 +57,7 @@ export default function PostPage() {
 
           <div className="flex items-center space-x-2">
             <Avatar className="w-9 h-9 rounded-full">
-              <AvatarImage className="w-9 h-9 rounded-full" src={"https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg"} />
+              <AvatarImage className="w-9 h-9 rounded-full" src={authorProfileImageUrl} />
               <AvatarFallback>{post.userDto.username}</AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium">{post.userDto.username}</span>
@@ -146,7 +148,7 @@ export default function PostPage() {
                   <div className=" -mb-4">
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-7 h-7 rounded-full">
-                        <AvatarImage className="w-7 h-7 rounded-full" src={"https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg"} />
+                        <AvatarImage className="w-7 h-7 rounded-full" src={`data:image/jpeg;base64,${comment.user.profilePicture}`} />
                         <AvatarFallback>{comment.user.username}</AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-medium">{comment.user.username}</span>

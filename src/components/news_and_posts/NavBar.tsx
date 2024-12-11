@@ -9,18 +9,20 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NewsCardProps } from "./NewsCard";
 import { fetchNews } from "@/services/newsService";
 import { NewsModal } from "./NewsModal";
 import { useRouter } from "next/navigation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { getUser, logout } from "@/services/authenticationService";
 
 const NavBar: React.FC = () => {
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState<NewsCardProps[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedNews, setSelectedNews] = useState<NewsCardProps | null>(null);
+    const [profilePicture, setProfilePicture] = useState<string | null>(null)
 
     const router = useRouter();
 
@@ -32,6 +34,7 @@ const NavBar: React.FC = () => {
         router.push("/posts");
         console.log("plm");
     }
+
 
     const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -62,6 +65,32 @@ const NavBar: React.FC = () => {
     const handleMyPostsClick = () => {
         router.push("/my-posts")
     }
+
+    function handleLogout() {
+        logout();
+        router.push("/auth/login");
+    }
+
+    useEffect(() => {
+        const checkUser = async () => {
+          try {
+            const user = await getUser(); // Call the API to get the user
+            if (user) {
+              setProfilePicture(
+                `data:image/jpeg;base64,${user.profilePicture}` // Convert byte array to a Base64 string
+              );
+            } else {
+              router.push("/auth/login"); // Redirect if no user is logged in
+            }
+          } catch (error) {
+            console.error("Error fetching user:", error);
+            router.push("/auth/login"); // Redirect if fetching fails
+          }
+        };
+    
+        checkUser();
+      }, [router]);
+
 
     return (
         <NavigationMenu className="flex max-w-full items-center justify-between p-4 bg-white shadow-md">
@@ -118,15 +147,17 @@ const NavBar: React.FC = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                     <Avatar className="rounded-full w-8 h-8 cursor-pointer">
-                        <AvatarImage src="https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg" />
+                        <AvatarImage src={profilePicture ||
+                            "https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg"
+                        } />
                         <AvatarFallback>NA</AvatarFallback>
                     </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleMyPostsClick}>My Posts</DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">Logout</DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleMyPostsClick}>My Posts</DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>Logout</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
                 

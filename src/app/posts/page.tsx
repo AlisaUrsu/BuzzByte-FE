@@ -85,10 +85,14 @@ export default function Home() {
     const loadPosts = async () => {
       setLoading(true);
       try {
-        //const currentUser = await getUser();
-        //const tagNames = currentUser.tags.map(tag => tag.name);
-        const newPosts = await fetchPosts({pageNumber: page, pageSize: 100, postTags: tags, postTitle: title, postContent: content, startDate: startDate, endDate: endDate});
-        
+        let newPosts;
+        if (tags.length == 0){
+          const currentUser = await getUser();
+          const tagNames = currentUser.tags.map(tag => tag.name);
+          newPosts = await fetchPosts ({pageNumber: page, pageSize: 100, postTags: tagNames});
+        } else {
+          newPosts = await fetchPosts({pageNumber: page, pageSize: 100, postTags: tags, postTitle: title, postContent: content, startDate: startDate, endDate: endDate});
+        }
         setPosts(newPosts.items);
          // console.log(newPosts.items[0].userDto.username);
       
@@ -128,7 +132,7 @@ export default function Home() {
         
           <PostNoImageCard
             key={post.id}
-            avatarUrl={"https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg"}
+            avatarUrl={post.userDto.profilePicture}
             avatarFallback={post.userDto.username}
             username={post.userDto.username}
             createdAt={post.createdAt}

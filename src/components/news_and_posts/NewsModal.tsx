@@ -13,8 +13,6 @@ type NewsModalProps = {
   urlToImage?: string;
   sourceUrl: string;
   categories: string[];
-  comments: Comment[];
-  onAddComment: (comment: Omit<Comment, 'id' | 'createdAt' | 'likes'>) => void;
   postId: string;
 
 };
@@ -31,9 +29,6 @@ export function NewsModal({
   urlToImage,
   sourceUrl,
   categories,
-  onAddComment,
-  postId,
-  comments
 }: NewsModalProps) {
   if (!isOpen) return null;
 
@@ -113,11 +108,6 @@ export function NewsModal({
             </span>
           ))}
         </div>
-        <NewsComments
-          postId={postId}
-          comments={comments}
-          onAddComment={onAddComment}
-        />
       </div>
     </div>
   );

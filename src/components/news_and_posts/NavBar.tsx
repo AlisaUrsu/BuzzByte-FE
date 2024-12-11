@@ -83,13 +83,13 @@ const NavBar: React.FC = () => {
             </NavigationMenuList>
 
             <NavigationMenuList className="flex-1 mx-8 relative">
-                    <Search className="absolute left-2.5 top-2.5 h-5 w-5 text-muted-foreground" />
-                    <Input
-                        placeholder="Search"
-                        value={query}
-                        onChange={handleSearch}
-                        className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-                    />
+                <Search className="absolute left-2.5 top-2.5 h-5 w-5 text-muted-foreground" />
+                <Input
+                    placeholder="Search"
+                    value={query}
+                    onChange={handleSearch}
+                    className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+                />
 
                 {searchResults.length > 0 && (
                     <div className="absolute top-full left-0 w-full bg-white shadow-lg rounded-lg mt-2 z-50 max-h-60 overflow-y-auto">
@@ -115,21 +115,23 @@ const NavBar: React.FC = () => {
                     </Button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                    <Avatar className="rounded-full w-8 h-8 cursor-pointer">
-                        <AvatarImage src="https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg" />
-                        <AvatarFallback>NA</AvatarFallback>
-                    </Avatar>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleMyPostsClick}>My Posts</DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">Logout</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Avatar className="rounded-full w-8 h-8 cursor-pointer">
+                                <AvatarImage src="https://miamistonesource.com/wp-content/uploads/2018/05/no-avatar-25359d55aa3c93ab3466622fd2ce712d1.jpg" />
+                                <AvatarFallback>NA</AvatarFallback>
+                            </Avatar>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleMyPostsClick}>My Posts</DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer">Logout</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push("/bookmarks")}>My Bookmarks</DropdownMenuItem>
+
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                 </NavigationMenuItem>
             </NavigationMenuList>
 

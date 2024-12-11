@@ -34,3 +34,9 @@ export function DateDisplay({ dateString }: { dateString: string }) {
 
   return <span>{formattedDate} ago</span>;
 }
+
+export const formatAsLocalDateTimeWithMillis = (date: Date): string => {
+  const pad = (n: number, width = 2) => n.toString().padStart(width, '0');
+  const padMillis = (n: number) => n.toString().padStart(3, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${padMillis(date.getMilliseconds())}`;
+};

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "../ui/button";
@@ -7,6 +7,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { description } from "../login/login-form";
 import { Badge } from "../ui/badge";
 import { DateDisplay } from "@/app/utils/FormatDate";
+import { addBookmark, deleteBookmark, isBookmarked } from "@/services/postService";
+import { getUser } from "@/services/authenticationService";
 
 export type PostNoImageCardProps = {
     avatarUrl: string;
@@ -19,8 +21,9 @@ export type PostNoImageCardProps = {
     likes: number;
     comments: number;
     updatedAt: string;
+    postId: number;
   };
-export function PostNoImageCard({
+  export function PostNoImageCard({
     avatarUrl,
     avatarFallback,
     username,
@@ -30,53 +33,84 @@ export function PostNoImageCard({
     categories,
     likes,
     comments,
-    updatedAt
+    updatedAt,
+    postId,
   }: PostNoImageCardProps) {
     const [liked, setLiked] = useState(false);
     const [commented, setCommented] = useState(false);
     const [bookmarked, setBookmarked] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
-
+  
     const isEdited = createdAt !== updatedAt;
   
+    useEffect(() => {
+      const checkBookmarkStatus = async () => {
+        try {
+          const bookmarked = await isBookmarked(postId);
+          setBookmarked(bookmarked);
+        } catch (error) {
+          console.error('Error checking bookmark status:', error);
+        }
+      };
+      checkBookmarkStatus();
+    }, [postId]);
+  
+    const toggleBookmark = async () => {
+      const userId = (await getUser()).id;
+      try {
+        setIsLoading(true);
+        if (bookmarked) {
+          await deleteBookmark(userId, postId);
+          setBookmarked(false);
+        } else {
+          await addBookmark(userId, postId);
+          setBookmarked(true);
+        }
+      } catch (error) {
+        console.error('Error toggling bookmark:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
     return (
-        <Card className="shadow-md border rounded-lg mt-2">
-            <CardHeader className="-mb-3">
-                <div  className="flex items-center justify-between ">
-    
-                <div className="flex items-center space-x-2">
-                    <Avatar className="w-7 h-7 rounded-full">
-                    <AvatarImage className="w-7 h-7 rounded-full" src={profileImageUrl} />
-                    <AvatarFallback>{avatarFallback}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium">{username}</span>
-                    <div className="text-xs text-muted-foreground"><DateDisplay dateString={createdAt}></DateDisplay></div>
-                    {isEdited && (
-                      <span className="text-xs text-muted-foreground">(Edited)</span>
-                    )}
-                </div>
-
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                    <button className="p-1">
-                        <MoreHorizontal className="h-5 w-5 cursor-pointer" />
-                    </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Hide</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Share</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                </div>
-            </CardHeader>
-
+      <Card className="shadow-md border rounded-lg mt-2">
+        <CardHeader className="-mb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Avatar className="w-7 h-7 rounded-full">
+                <AvatarImage className="w-7 h-7 rounded-full" src={profileImageUrl} />
+                <AvatarFallback>{avatarFallback}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium">{username}</span>
+              <div className="text-xs text-muted-foreground"><DateDisplay dateString={createdAt}></DateDisplay></div>
+              {isEdited && (
+                <span className="text-xs text-muted-foreground">(Edited)</span>
+              )}
+            </div>
+  
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-1">
+                  <MoreHorizontal className="h-5 w-5 cursor-pointer" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Hide</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Share</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
+  
         <CardContent>
           <CardTitle className="font-bold text-lg">{title}</CardTitle>
           <CardDescription className="text-sm text-muted-foreground line-clamp-3 ">
             {content}
           </CardDescription>
-
+  
           <div className="mt-3 flex flex-wrap gap-2">
             {categories.map((category, index) => (
               <Badge
@@ -89,12 +123,11 @@ export function PostNoImageCard({
               </Badge>
             ))}
           </div>
-
+  
           <div className="mt-4 flex justify-between items-center">
             <div className="flex space-x-4 items-center text-muted-foreground">
               <div
-                className={`flex items-center space-x-1 cursor-pointer ${liked ? "text-red-500" : ""
-                  }`}
+                className={`flex items-center space-x-1 cursor-pointer ${liked ? "text-red-500" : ""}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -104,29 +137,27 @@ export function PostNoImageCard({
                 <Heart className="h-5 w-5" />
                 <span>{likes + (liked ? 1 : 0)}</span>
               </div>
-
-              <div
-                className="flex items-center space-x-1 cursor-pointer"
-              >
+  
+              <div className="flex items-center space-x-1 cursor-pointer">
                 <MessageCircle className="h-5 w-5" />
                 <span>{comments}</span>
               </div>
             </div>
-
-            <div
-              className={`cursor-pointer ${bookmarked ? "text-yellow-500" : ""
-                }`}
+  
+            <Button
+              variant="ghost"
+              className={`p-0 ${bookmarked ? "text-yellow-500" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                setBookmarked(!bookmarked);
+                toggleBookmark();
               }}
+              disabled={isLoading}
             >
               <Bookmark className="h-5 w-5" />
-            </div>
+            </Button>
           </div>
         </CardContent>
-
-        </Card>
-    )
+      </Card>
+    );
   }

@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"; // For 
 import { Badge } from "@/components/ui/badge"; // Assuming Badge component is in your UI library
 import { Button } from "@/components/ui/button"; // Assuming Button component is in your UI library
 import { Input } from "@/components/ui/input"; // Assuming Input component is in your UI library
-import { fetchPostById, fetchPosts } from "@/services/postService"; // Replace with your API service function
+import { addBookmark, deleteBookmark, fetchPostById, fetchPosts } from "@/services/postService"; // Replace with your API service function
 import { PostDto, PostCommentDto } from "@/services/postService";
 import { Bookmark, Heart, MessageCircle, Send } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import NavBar from "@/components/news_and_posts/NavBar";
 import { addComment, AddPostCommentDto } from "@/services/postService";
+import { getUser } from "@/services/authenticationService";
 
 
 export default function PostPage() {
@@ -34,6 +35,7 @@ export default function PostPage() {
   const [liked, setLiked] = useState(false);
   const [commented, setCommented] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const newCommentLength = newComment.trim().length
   const authorProfileImageUrl = `data:image/jpeg;base64,${post?.userDto.profilePicture}`;
 
@@ -54,6 +56,25 @@ export default function PostPage() {
   if (!post) return <p>Loading...</p>;
 
   const isEdited = post.createdAt !== post.updatedAt;
+
+  const toggleBookmark = async () => {
+    try {
+      setIsLoading(true);
+      const user = await getUser(); // Get the user object
+      const userId = user.id; // Extract the user ID
+      if (bookmarked) {
+        await deleteBookmark(userId, Number(postId));
+        setBookmarked(false);
+      } else {
+        await addBookmark(userId, Number(postId));
+        setBookmarked(true);
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,16 +159,15 @@ export default function PostPage() {
           </div>
         </div>
 
-        <div
-          className={`cursor-pointer ${bookmarked ? "text-yellow-500" : ""}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            setBookmarked(!bookmarked);
-
-          }}
-        >
-
-          <Bookmark className="h-6 w-6" />
+        <div className="flex justify-end">
+          <button
+            onClick={toggleBookmark}
+            disabled={isLoading}
+            className={`flex items-center gap-1 text-gray-500 hover:text-gray-700 ${bookmarked ? "text-yellow-500" : ""}`}
+          >
+            <Bookmark className="h-5 w-5" />
+            {bookmarked ? "Bookmarked" : "Bookmark"}
+          </button>
         </div>
       </div>
       {/* Comments Section */}

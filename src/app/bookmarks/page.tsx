@@ -1,17 +1,40 @@
-"use client"
+"use client";
 
 import NavBar from "@/components/news_and_posts/NavBar";
-import { NewsCard, NewsCardProps } from "@/components/news_and_posts/NewsCard";
+import { PostNoImageCard, PostNoImageCardProps } from "@/components/news_and_posts/PostNoImageCard";
+import { getUser } from "@/services/authenticationService";
+import { fetchBookmarkedPosts } from "@/services/postService";
 import React, { useState, useEffect } from "react";
 
 const Bookmarks: React.FC = () => {
-  const [bookmarks, setBookmarks] = useState<NewsCardProps[]>([]);
+  const [bookmarks, setBookmarks] = useState<PostNoImageCardProps[]>([]);
 
   useEffect(() => {
-    const storedBookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-    if (storedBookmarks.length > 0) {
-      setBookmarks(storedBookmarks);
-    }
+    const loadBookmarks = async () => {
+      try {
+        const user = await getUser(); // Get the user object
+        const userId = user.id; // Extract the user ID
+        const bookmarkedPosts = await fetchBookmarkedPosts(userId);
+        const formattedBookmarks = bookmarkedPosts.map(post => ({
+          avatarUrl: post.userDto.profilePicture,
+          avatarFallback: post.userDto.username[0],
+          username: post.userDto.username,
+          createdAt: post.createdAt,
+          title: post.title,
+          content: post.content,
+          categories: post.tags.map(tag => tag.name),
+          likes: post.likes,
+          comments: post.comments ? post.comments.length : 0,
+          updatedAt: post.updatedAt,
+          postId: post.id,
+        }));
+        setBookmarks(formattedBookmarks);
+      } catch (error) {
+        console.error('Error loading bookmarks:', error);
+      }
+    };
+
+    loadBookmarks();
   }, []);
 
   return (
@@ -21,19 +44,19 @@ const Bookmarks: React.FC = () => {
         <h1 className="text-2xl font-bold mb-4">My Bookmarks</h1>
         <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
           {bookmarks.map((bookmark, index) => (
-            <NewsCard
+            <PostNoImageCard
               key={index}
               avatarUrl={bookmark.avatarUrl}
               avatarFallback={bookmark.avatarFallback}
-              userName={bookmark.userName}
-              date={bookmark.date}
+              username={bookmark.username}
+              createdAt={bookmark.createdAt}
               title={bookmark.title}
-              description={bookmark.description}
-              imageUrl={bookmark.imageUrl}
-              urlToImage={bookmark.urlToImage}
-              sourceUrl={bookmark.sourceUrl}
+              content={bookmark.content}
               categories={bookmark.categories}
-              onHide={() => {}}
+              likes={bookmark.likes}
+              comments={bookmark.comments}
+              updatedAt={bookmark.updatedAt}
+              postId={bookmark.postId}
             />
           ))}
         </div>

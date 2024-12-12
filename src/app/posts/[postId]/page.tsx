@@ -15,16 +15,22 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import NavBar from "@/components/news_and_posts/NavBar";
+import { addComment, AddPostCommentDto } from "@/services/postService";
 
 
 export default function PostPage() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const params = useParams();
   const postId = params.postId;
   const [post, setPost] = useState<PostDto | null>(null);
   const [newComment, setNewComment] = useState<string>("");
-  const [comments, setComments] = useState<PostCommentDto[]>([]);
+  const [comments, setComments] = useState<PostCommentDto[]>(() => {
+    const initialComments = post?.comments || [];
+    return initialComments.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  });
   const [liked, setLiked] = useState(false);
   const [commented, setCommented] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
@@ -35,7 +41,7 @@ export default function PostPage() {
   useEffect(() => {
     async function loadPost() {
       try {
-        const fetchedPost = await fetchPosts({pageNumber:0, pageSize: 1, postId: Number(postId)});
+        const fetchedPost = await fetchPosts({ pageNumber: 0, pageSize: 1, postId: Number(postId) });
         setPost(fetchedPost.items[0]);
         setComments(fetchedPost.items.flatMap((post) => post.comments || []));
       } catch (error) {
@@ -48,6 +54,31 @@ export default function PostPage() {
   if (!post) return <p>Loading...</p>;
 
   const isEdited = post.createdAt !== post.updatedAt;
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newComment.trim()) {
+      return;
+    }
+
+    try {
+      const commentData: AddPostCommentDto = {
+        content: newComment.trim(),
+        postId: post.id,
+      };
+
+      const addedComment = await addComment(commentData);
+
+      // Prepend the new comment to the comments array
+      setComments((prevComments) => [addedComment, ...prevComments]);
+
+      setNewComment("");
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+      // Handle the error appropriately
+    }
+  };
 
   return (
     <><NavBar /><Card className="max-w-3xl mx-auto p-10 pt-3">
@@ -92,7 +123,7 @@ export default function PostPage() {
             onClick={(e) => {
               e.stopPropagation();
               setLiked(!liked);
-            } }
+            }}
           >
             <Heart className="h-6 w-6" />
             <span>{post.likes + (liked ? 1 : 0)}</span>
@@ -112,31 +143,33 @@ export default function PostPage() {
           onClick={(e) => {
             e.stopPropagation();
             setBookmarked(!bookmarked);
-            
-          } }
+
+          }}
         >
-          
+
           <Bookmark className="h-6 w-6" />
         </div>
       </div>
       {/* Comments Section */}
       <Separator />
-      <form
-        className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring mt-4">
+      <form onSubmit={handleAddComment}>
         <Textarea
-          id="comment"
           placeholder="What do you think?"
           className="min-h-12 resize-none border-none p-3 shadow-none focus-visible:ring-0"
           autoComplete="off"
           value={newComment}
-          onChange={(event) => setNewComment(event.target.value)} />
+          onChange={(event) => setNewComment(event.target.value)}
+        />
         <div className="flex items-center p-3 pt-0">
-          <Button type="submit" size="sm" className="flex justify-end ml-auto gap-1.5" disabled={newCommentLength === 0}>
+          <Button
+            type="submit"
+            size="sm"
+            className="flex justify-end ml-auto gap-1.5"
+            disabled={!newComment.trim()}
+          >
             Comment
           </Button>
         </div>
-
-
       </form>
       <div>
         <h2 className="text-lg font-semibold mt-4">Comments</h2>
@@ -145,23 +178,32 @@ export default function PostPage() {
             <div key={comment.id} className="-mb-2 -ml-6 -mr-6">
               <Card className="border-none">
                 <CardHeader>
-                  <div className=" -mb-4">
+                  <div className="-mb-4">
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-7 h-7 rounded-full">
-                        <AvatarImage className="w-7 h-7 rounded-full" src={`data:image/jpeg;base64,${comment.user.profilePicture}`} />
-                        <AvatarFallback>{comment.user.username}</AvatarFallback>
+                        <AvatarImage
+                          className="w-7 h-7 rounded-full"
+                          src={`data:image/jpeg;base64,${comment.user.profilePicture}`}
+                        />
+                        <AvatarFallback>
+                          {comment.user.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium">{comment.user.username}</span>
-                      <div className="text-xs text-muted-foreground"><DateDisplay dateString={comment.createdAt}></DateDisplay></div>
+                      <span className="text-sm font-medium">
+                        {comment.user.username}
+                      </span>
+                      <div className="text-xs text-muted-foreground">
+                        <DateDisplay dateString={comment.createdAt} />
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="text-sm ">{comment.content}</CardContent>
+                <CardContent className="text-sm">{comment.content}</CardContent>
               </Card>
             </div>
           ))
         ) : (
-          <p className="text-sm">No comments yet.</p> 
+          <p>No comments yet.</p>
         )}
       </div>
 

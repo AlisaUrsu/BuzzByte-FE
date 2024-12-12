@@ -142,6 +142,7 @@ export default function Home() {
             likes={post.likes}
             comments={post.comments? post.comments.length : 0}
             updatedAt={post.updatedAt}
+            postId={post.id}
           />
           
           </Link>

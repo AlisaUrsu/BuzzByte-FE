@@ -12,6 +12,7 @@ export interface UserDto {
   role: string;
   tags: TagDto[];
   profilePicture: string;
+  bookmarksPostIds: number[]; 
 }
 
 export interface AddPostCommentDto {
@@ -83,6 +84,12 @@ interface FetchTagsParams {
   tagId?: number;
   tagName?: string;
 
+}
+
+interface PostLikeDto {
+  id: number,
+  user: UserDto,
+  postId: number
 }
 
 class TemporaryAuthError extends Error {
@@ -230,6 +237,7 @@ export async function fetchTags(params: FetchTagsParams): Promise<PaginatedRespo
     return result.data;
 }
 
+// COMMENTS
 export async function fetchComments(): Promise<PostCommentDto[]> {
   const response = await fetchWithAuth("http://localhost:8080/api/comments", 
     {
@@ -285,4 +293,81 @@ export async function deleteComment(commentId: number) {
   await fetchWithAuth(`http://localhost:8080/api/posts/` + commentId, {
     method: "DELETE",
   });
+}
+
+// BOOKMARKS
+export async function addBookmark(userId: number, postId: number): Promise<UserDto> {
+  const response = await fetchWithAuth("http://localhost:8080/api/bookmarks/" + userId,
+    {
+      method: "POST",
+      headers: {
+       "Content-Type": "text/plain",
+      }
+    });
+    const result: Result<UserDto> = await response.json();
+    return result.data;
+}
+
+export async function deleteBookmark(userId: number, postId: number) {
+  await fetchWithAuth("http://localhost:8080/api/bookmarks/" + userId,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "text/plain",
+       }
+    });
+}
+
+export async function fetchBookmarkedPosts(userId: number): Promise<PostDto[]> {
+  const response = await fetchWithAuth(`http://localhost:8080/api/bookmarks/${userId}/posts`,
+    {
+      method: "GET"
+    });
+  const result: Result<PostDto[]> = await response.json();
+  return result.data;
+}
+
+export async function isBookmarked(postId: number): Promise<boolean> {
+  const response = await fetchWithAuth(`http://localhost:8080/api/bookmarks/post/${postId}/bookmarked`,
+    {
+      method: "GET"
+    }
+  );
+  const result: Result<boolean> = await response.json();
+  return result.data;
+}
+
+// LIKES
+
+export async function addLike(postId: number): Promise<PostLikeDto> {
+  const response = await fetchWithAuth("http://localhost:8080/api/likes",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(postId),
+    }
+  );
+  const result: Result<PostLikeDto> = await response.json();
+  return result.data;
+  
+}
+
+export async function deleteLike(likeId: number) {
+  await fetchWithAuth("http://localhost:8080/api/likes/" + likeId,
+    {
+      method: "DELETE"
+    }
+  );
+}
+
+export async function isLiked(postId: number): Promise<boolean> {
+  const response = await fetchWithAuth(`http://localhost:8080/api/likes/post/${postId}/liked`,
+    {
+      method: "GET"
+    }
+  );
+  const result: Result<boolean> = await response.json();
+  return result.data;
 }

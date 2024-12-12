@@ -97,6 +97,7 @@ export function PostNoImageCard({
                   }`}
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   setLiked(!liked);
                 }}
               >
@@ -117,6 +118,7 @@ export function PostNoImageCard({
                 }`}
               onClick={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 setBookmarked(!bookmarked);
               }}
             >

@@ -7,10 +7,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { description } from "../login/login-form";
 import { Badge } from "../ui/badge";
 import { DateDisplay } from "@/app/utils/FormatDate";
+import { AspectRatio } from "../ui/aspect-ratio";
+import Image from "next/image";
 import { getUser } from "@/services/authenticationService";
 import { addLike, deleteLike, fetchLikesByPostId, isLiked, PostLikeDto } from "@/services/postService";
 
-export type PostNoImageCardProps = {
+export type PostCardProps = {
     postId: number;
     avatarUrl: string;
     avatarFallback: string;
@@ -19,11 +21,12 @@ export type PostNoImageCardProps = {
     title: string;
     content: string;
     categories: string[];
+    image: string | undefined | null;
     likes: number;
     comments: number;
     updatedAt: string;
   };
-export function PostNoImageCard({
+export function PostCard({
     postId,
     avatarUrl,
     avatarFallback,
@@ -32,64 +35,66 @@ export function PostNoImageCard({
     title,
     content,
     categories,
+    image,
     likes,
     comments,
     updatedAt
-  }: PostNoImageCardProps) {
+  }: PostCardProps) {
     const [liked, setLiked] = useState<boolean>(false);
     const [likeId, setLikeId] = useState<number | null>(null);
-    const [likesCounter, setLikesCounter] = useState<number>(likes);
     const [commented, setCommented] = useState(false);
     const [bookmarked, setBookmarked] = useState(false);
     const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
+    const postImageUrl = `data:image/jpeg;base64,${image}`;
+    const [likesCounter, setLikesCounter] = useState<number>(likes);
 
     const isEdited = createdAt !== updatedAt;
 
     useEffect(() => {
-      async function checkIfLiked() {
-          const user = await getUser();
-          
-          if (postId) {
-            const likedStatus = await isLiked(Number(postId)); // Check if current user liked the post
-            setLiked(likedStatus);
-            if (likedStatus) {
-              // If liked, we should fetch the likeId to delete it later
-              const data = await fetchLikesByPostId(Number(postId));
-              console.log(data);
-              // Assume the server returns the list of likes for the post
-              // Now find the likeId of the current user and store it
-              const userLike = data.find((like: PostLikeDto) => like.user.id === user.id);
-              console.log(userLike);
-              if (userLike) {
-                setLikeId(userLike.id); // Store the likeId for later use
+        async function checkIfLiked() {
+            const user = await getUser();
+            
+            if (postId) {
+              const likedStatus = await isLiked(Number(postId)); // Check if current user liked the post
+              setLiked(likedStatus);
+              if (likedStatus) {
+                // If liked, we should fetch the likeId to delete it later
+                const data = await fetchLikesByPostId(Number(postId));
+                console.log(data);
+                // Assume the server returns the list of likes for the post
+                // Now find the likeId of the current user and store it
+                const userLike = data.find((like: PostLikeDto) => like.user.id === user.id);
+                console.log(userLike);
+                if (userLike) {
+                  setLikeId(userLike.id); // Store the likeId for later use
+                }
               }
             }
           }
-        }
+      
+          checkIfLiked();
+        }, [likeId, postId]);
     
-        checkIfLiked();
-      }, [likeId, postId]);
-  
 
-  const handleLike = async (e: React.MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      if (liked) {
-      // If already liked, remove the like
-      if (likeId) {
-          await deleteLike(likeId); // Pass the likeId to delete the like
-          setLiked(false); // Update local state to reflect the unlike
-          setLikeId(null); // Clear the likeId after deletion
-          setLikesCounter(prevLikes => prevLikes - 1);
-      }
-      } else {
-      // If not liked, add the like
-      const addedLike = await addLike({postId: Number(postId)});
-      setLiked(true); // Update local state to reflect the like
-      setLikeId(addedLike.id); // Store the likeId of the added like
-      setLikesCounter(prevLikes => prevLikes + 1);
-      }
-  };
+    const handleLike = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (liked) {
+        // If already liked, remove the like
+        if (likeId) {
+            await deleteLike(likeId); // Pass the likeId to delete the like
+            setLiked(false); // Update local state to reflect the unlike
+            setLikeId(null); // Clear the likeId after deletion
+            setLikesCounter(prevLikes => prevLikes - 1);
+        }
+        } else {
+        // If not liked, add the like
+        const addedLike = await addLike({postId: Number(postId)});
+        setLiked(true); // Update local state to reflect the like
+        setLikeId(addedLike.id); // Store the likeId of the added like
+        setLikesCounter(prevLikes => prevLikes + 1);
+        }
+    };
   
     return (
         <Card className="shadow-md border rounded-lg mt-2">
@@ -127,9 +132,10 @@ export function PostNoImageCard({
           <CardTitle className="font-bold text-lg">{title}</CardTitle>
           <CardDescription className="text-sm text-muted-foreground line-clamp-3 ">
             {content}
+        
           </CardDescription>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 mb-4">
             {categories.map((category, index) => (
               <Badge
                 key={index}
@@ -141,7 +147,17 @@ export function PostNoImageCard({
               </Badge>
             ))}
           </div>
-
+          <div suppressHydrationWarning={true}>
+            <AspectRatio ratio={16 / 9} className="bg-muted"  suppressHydrationWarning={true}>
+                <Image
+                    
+                    src={postImageUrl}
+                    alt="Photo by Drew Beamer"
+                    fill
+                    className="h-full w-full rounded-md object-cover"
+                />
+            </AspectRatio>
+            </div>
           <div className="mt-4 flex justify-between items-center">
             <div className="flex space-x-4 items-center text-muted-foreground">
             <div
@@ -167,6 +183,7 @@ export function PostNoImageCard({
                 }`}
               onClick={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 setBookmarked(!bookmarked);
               }}
             >

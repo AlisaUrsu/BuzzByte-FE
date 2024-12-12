@@ -53,6 +53,7 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [postImageUrl, setPostImageUrl] = useState<string>();
   //const searchParams = useSearchParams(); 
   //const postId = searchParams.get("postId");
 
@@ -83,11 +84,16 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
       try {
         setLoading(true);
         const post = await fetchPostById(Number(postId));
+        if (post.image) {
+          setPostImageUrl(`data:image/jpeg;base64,${post.image}`);
+        } else {
+          setPostImageUrl("");
+        }
         form.reset({
           title_input: post.title,
           content_textarea: post.content,
           tags_menu: post.tags.map((tag: any) => tag.name), 
-          image_input: post.image || "",
+          image_input: postImageUrl,
         });
         setSelectedTags(post.tags.map((tag: any) => tag.name));
       } catch (error) {
@@ -116,19 +122,32 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
       toast.error("Post ID is missing.");
       return;
     }
+    let base64ImageString: string | undefined;
+  if (files?.length) {
+    const file = files[0];
+    const fileReader = new FileReader();
+
+    // Convert the file to a Base64 string
+    const fullBase64ImageString = await new Promise<string>((resolve, reject) => {
+      fileReader.onload = () => resolve(fileReader.result as string);
+      fileReader.onerror = () => reject(new Error("Failed to read file"));
+      fileReader.readAsDataURL(file); // Converts to Base64
+    });
+    
+    base64ImageString = fullBase64ImageString.split(",")[1];
+  }
 
     const updatedPost = {
       title: values.title_input,
-      description: "", // Update description if applicable
       content: values.content_textarea,
       tags: values.tags_menu,
-      image: files?.length ? URL.createObjectURL(files[0]) : values.image_input,
+      image: base64ImageString
     };
 
     try {
       const result = await updatePost(updatedPost, Number(postId));
       //toast.success("Post updated successfully!");
-      router.push("/"); // Redirect after successful update
+      router.push("/my-posts"); // Redirect after successful update
       console.log(result);
     } catch (error) {
       console.error("Error updating post:", error);
@@ -207,6 +226,7 @@ export default function UpdatePostForm({ postId }: { postId: string }) {
                         files={files}
                         setFiles={setFiles}
                         onFileUrlChange={handleImageUrlChange}
+                        preloadedImageUrl={postImageUrl}
                       />
                     </FormControl>
                     <FormDescription>Update or upload a new image.</FormDescription>

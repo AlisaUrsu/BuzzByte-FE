@@ -9,6 +9,8 @@ import { MyPostNoImageCard } from "@/components/news_and_posts/MyPostNoImageCard
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { getUser } from "@/services/authenticationService";
+import Link from "next/link";
+import { MyPostCard } from "@/components/news_and_posts/MyPostCard";
 
 export default function Home() {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -76,22 +78,44 @@ export default function Home() {
         </div>
       </div>) :
         (posts.map((post) => (
-          
+          <Link key={post.id} href={`/posts/${post.id}`} passHref className="block hover:shadow-lg transition">
+          {post.image && post.image.trim() !== "" ? (
+          <MyPostCard
+          key={post.id}
+          postId={post.id.toString()}
+          avatarUrl={post.userDto.profilePicture}
+          avatarFallback={post.userDto.username}
+          username={post.userDto.username}
+          createdAt={post.createdAt}
+          title={post.title}
+          image={post.image}
+          content={post.content}
+          categories={post.tags.map(tag => tag.name)}
+          likes={post.likes}
+          comments={post.comments? post.comments.length : 0}
+          updatedAt={post.updatedAt}
+          onDelete={handleDeletePost}
+        />
+          ) :
+          (
           <MyPostNoImageCard
-            key={post.id}
-            postId={post.id.toString()}
-            avatarUrl={post.userDto.profilePicture}
-            avatarFallback={post.userDto.username}
-            username={post.userDto.username}
-            createdAt={post.createdAt}
-            title={post.title}
-            content={post.content}
-            categories={post.tags.map(tag => tag.name)}
-            likes={post.likes}
-            comments={post.comments? post.comments.length : 0}
-            updatedAt={post.updatedAt}
-            onDelete={handleDeletePost}
-          />
+              key={post.id}
+              postId={post.id.toString()}
+              avatarUrl={post.userDto.profilePicture}
+              avatarFallback={post.userDto.username}
+              username={post.userDto.username}
+              createdAt={post.createdAt}
+              title={post.title}
+              content={post.content}
+              categories={post.tags.map(tag => tag.name)}
+              likes={post.likes}
+              comments={post.comments? post.comments.length : 0}
+              updatedAt={post.updatedAt}
+              onDelete={handleDeletePost}
+            />
+          )
+        }
+          </Link>
         )))}
         
       </div>

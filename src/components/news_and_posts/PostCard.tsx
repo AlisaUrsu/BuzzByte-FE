@@ -7,23 +7,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { description } from "../login/login-form";
 import { Badge } from "../ui/badge";
 import { DateDisplay } from "@/app/utils/FormatDate";
-import { useRouter } from "next/navigation";
-
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@/components/ui/dialog"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
-import { addLike, deleteLike, deletePost, fetchLikesByPostId, isLiked, PostLikeDto } from "@/services/postService";
+import { AspectRatio } from "../ui/aspect-ratio";
+import Image from "next/image";
 import { getUser } from "@/services/authenticationService";
+import { addLike, deleteLike, fetchLikesByPostId, isLiked, PostLikeDto } from "@/services/postService";
 
-export type PostNoImageCardProps = {
-    postId: string;
+export type PostCardProps = {
+    postId: number;
     avatarUrl: string;
     avatarFallback: string;
     username: string;
@@ -31,12 +21,12 @@ export type PostNoImageCardProps = {
     title: string;
     content: string;
     categories: string[];
+    image: string | undefined | null;
     likes: number;
     comments: number;
     updatedAt: string;
-    onDelete: (postId: number) => void;
   };
-export function MyPostNoImageCard({
+export function PostCard({
     postId,
     avatarUrl,
     avatarFallback,
@@ -45,33 +35,22 @@ export function MyPostNoImageCard({
     title,
     content,
     categories,
+    image,
     likes,
     comments,
-    updatedAt,
-    onDelete
-  }: PostNoImageCardProps) {
+    updatedAt
+  }: PostCardProps) {
     const [liked, setLiked] = useState<boolean>(false);
     const [likeId, setLikeId] = useState<number | null>(null);
-    const router = useRouter();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [commented, setCommented] = useState(false);
+    const [bookmarked, setBookmarked] = useState(false);
     const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
+    const postImageUrl = `data:image/jpeg;base64,${image}`;
     const [likesCounter, setLikesCounter] = useState<number>(likes);
-    const handleUpdateClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-        router.push(`/update/${postId}`);
-    }
 
-    const handleDeleteClick = async (e: React.MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-        await deletePost(Number(postId));
-        onDelete(Number(postId));
-      };
+    const isEdited = createdAt !== updatedAt;
 
-      const isEdited = createdAt !== updatedAt;
-
-      useEffect(() => {
+    useEffect(() => {
         async function checkIfLiked() {
             const user = await getUser();
             
@@ -118,61 +97,45 @@ export function MyPostNoImageCard({
     };
   
     return (
-        <><Card className="shadow-md border rounded-lg mt-2">
-        <CardHeader className="-mb-3">
-          <div className="flex items-center justify-between ">
-
-            <div className="flex items-center space-x-2">
-              <Avatar className="w-7 h-7 rounded-full">
-                <AvatarImage className="w-7 h-7 rounded-full" src={profileImageUrl} />
-                <AvatarFallback>{avatarFallback}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium">{username}</span>
-              <div className="text-xs text-muted-foreground"><DateDisplay dateString={createdAt}></DateDisplay></div>
-              {isEdited && (
+        <Card className="shadow-md border rounded-lg mt-2">
+            <CardHeader className="-mb-3">
+                <div  className="flex items-center justify-between ">
+    
+                <div className="flex items-center space-x-2">
+                    <Avatar className="w-7 h-7 rounded-full">
+                    <AvatarImage className="w-7 h-7 rounded-full" src={profileImageUrl} />
+                    <AvatarFallback>{avatarFallback}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium">{username}</span>
+                    <div className="text-xs text-muted-foreground"><DateDisplay dateString={createdAt}></DateDisplay></div>
+                    {isEdited && (
                       <span className="text-xs text-muted-foreground">(Edited)</span>
                     )}
-            </div>
-            <AlertDialog>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="p-1">
-                  <MoreHorizontal className="h-5 w-5 cursor-pointer" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleUpdateClick} className="cursor-pointer">Update</DropdownMenuItem>
-                <DropdownMenuSeparator />
+                </div>
 
-                <AlertDialogTrigger asChild>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <button className="p-1">
+                        <MoreHorizontal className="h-5 w-5 cursor-pointer" />
+                    </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Hide</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Share</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                </div>
+            </CardHeader>
 
-                  <DropdownMenuItem className="text-red-500 cursor-pointer">Delete</DropdownMenuItem>
-                </AlertDialogTrigger>
-
-
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Post</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete this post? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-red-500" onClick={handleDeleteClick}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-            </AlertDialog>
-        </div>
-      </CardHeader><CardContent>
+        <CardContent>
           <CardTitle className="font-bold text-lg">{title}</CardTitle>
           <CardDescription className="text-sm text-muted-foreground line-clamp-3 ">
             {content}
+        
           </CardDescription>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 mb-4">
             {categories.map((category, index) => (
               <Badge
                 key={index}
@@ -184,7 +147,17 @@ export function MyPostNoImageCard({
               </Badge>
             ))}
           </div>
-
+          <div suppressHydrationWarning={true}>
+            <AspectRatio ratio={16 / 9} className="bg-muted"  suppressHydrationWarning={true}>
+                <Image
+                    
+                    src={postImageUrl}
+                    alt="Photo by Drew Beamer"
+                    fill
+                    className="h-full w-full rounded-md object-cover"
+                />
+            </AspectRatio>
+            </div>
           <div className="mt-4 flex justify-between items-center">
             <div className="flex space-x-4 items-center text-muted-foreground">
             <div
@@ -205,10 +178,20 @@ export function MyPostNoImageCard({
               </div>
             </div>
 
+            <div
+              className={`cursor-pointer ${bookmarked ? "text-yellow-500" : ""
+                }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setBookmarked(!bookmarked);
+              }}
+            >
+              <Bookmark className="h-5 w-5" />
+            </div>
           </div>
         </CardContent>
-        
+
         </Card>
-        </>
     )
   }

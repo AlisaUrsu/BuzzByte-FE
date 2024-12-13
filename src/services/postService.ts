@@ -1,5 +1,6 @@
 import { ConflictError, UnauthorizedError } from "@/app/errors/http_errors";
 import { formatAsLocalDateTimeWithMillis } from "@/app/utils/FormatDate";
+import { json } from "stream/consumers";
 
 export interface TagDto {
   id: number;
@@ -38,7 +39,7 @@ export interface PostDto {
     content: string;
     tags: TagDto[];
     userDto: UserDto;
-    image?: string;
+    image: string;
     comments: PostCommentDto[] | null;
     likes: number;
     createdAt: string;
@@ -86,9 +87,13 @@ interface FetchTagsParams {
 
 }
 
-interface PostLikeDto {
+export interface PostLikeDto {
   id: number,
   user: UserDto,
+  postId: number
+}
+
+export interface AddPostLikeDto {
   postId: number
 }
 
@@ -342,14 +347,14 @@ export async function isBookmarked(postId: number): Promise<boolean> {
 
 // LIKES
 
-export async function addLike(postId: number): Promise<PostLikeDto> {
+export async function addLike(addLikeDto: AddPostLikeDto): Promise<PostLikeDto> {
   const response = await fetchWithAuth("http://localhost:8080/api/likes",
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(postId),
+      body: JSON.stringify(addLikeDto),
     }
   );
   const result: Result<PostLikeDto> = await response.json();
@@ -372,5 +377,15 @@ export async function isLiked(postId: number): Promise<boolean> {
     }
   );
   const result: Result<boolean> = await response.json();
+  return result.data;
+}
+
+export async function fetchLikesByPostId(postId: number): Promise<PostLikeDto[]> {
+  const response = await fetchWithAuth(`http://localhost:8080/api/likes/post/${postId}`,
+    {
+      method: "GET"
+    }
+  );
+  const result: Result<PostLikeDto[]> = await response.json();
   return result.data;
 }

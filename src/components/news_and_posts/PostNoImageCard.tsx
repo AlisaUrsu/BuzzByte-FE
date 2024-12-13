@@ -7,10 +7,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { description } from "../login/login-form";
 import { Badge } from "../ui/badge";
 import { DateDisplay } from "@/app/utils/FormatDate";
-import { addBookmark, deleteBookmark, isBookmarked } from "@/services/postService";
+
 import { getUser } from "@/services/authenticationService";
+import { addLike, deleteLike, fetchLikesByPostId, isLiked, PostLikeDto, addBookmark, deleteBookmark, isBookmarked } from "@/services/postService";
 
 export type PostNoImageCardProps = {
+    postId: number;
     avatarUrl: string;
     avatarFallback: string;
     username: string;
@@ -23,7 +25,9 @@ export type PostNoImageCardProps = {
     updatedAt: string;
     postId: number;
   };
-  export function PostNoImageCard({
+
+export function PostNoImageCard({
+    postId,
     avatarUrl,
     avatarFallback,
     username,
@@ -36,13 +40,61 @@ export type PostNoImageCardProps = {
     updatedAt,
     postId,
   }: PostNoImageCardProps) {
-    const [liked, setLiked] = useState(false);
+    const [liked, setLiked] = useState<boolean>(false);
+    const [likeId, setLikeId] = useState<number | null>(null);
+    const [likesCounter, setLikesCounter] = useState<number>(likes);
     const [commented, setCommented] = useState(false);
     const [bookmarked, setBookmarked] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
   
     const isEdited = createdAt !== updatedAt;
+
+    useEffect(() => {
+      async function checkIfLiked() {
+          const user = await getUser();
+          
+          if (postId) {
+            const likedStatus = await isLiked(Number(postId)); // Check if current user liked the post
+            setLiked(likedStatus);
+            if (likedStatus) {
+              // If liked, we should fetch the likeId to delete it later
+              const data = await fetchLikesByPostId(Number(postId));
+              console.log(data);
+              // Assume the server returns the list of likes for the post
+              // Now find the likeId of the current user and store it
+              const userLike = data.find((like: PostLikeDto) => like.user.id === user.id);
+              console.log(userLike);
+              if (userLike) {
+                setLikeId(userLike.id); // Store the likeId for later use
+              }
+            }
+          }
+        }
+    
+        checkIfLiked();
+      }, [likeId, postId]);
+  
+
+  const handleLike = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (liked) {
+      // If already liked, remove the like
+      if (likeId) {
+          await deleteLike(likeId); // Pass the likeId to delete the like
+          setLiked(false); // Update local state to reflect the unlike
+          setLikeId(null); // Clear the likeId after deletion
+          setLikesCounter(prevLikes => prevLikes - 1);
+      }
+      } else {
+      // If not liked, add the like
+      const addedLike = await addLike({postId: Number(postId)});
+      setLiked(true); // Update local state to reflect the like
+      setLikeId(addedLike.id); // Store the likeId of the added like
+      setLikesCounter(prevLikes => prevLikes + 1);
+      }
+  };
   
     useEffect(() => {
       const checkBookmarkStatus = async () => {
@@ -126,16 +178,14 @@ export type PostNoImageCardProps = {
   
           <div className="mt-4 flex justify-between items-center">
             <div className="flex space-x-4 items-center text-muted-foreground">
-              <div
-                className={`flex items-center space-x-1 cursor-pointer ${liked ? "text-red-500" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setLiked(!liked);
-                }}
-              >
-                <Heart className="h-5 w-5" />
-                <span>{likes + (liked ? 1 : 0)}</span>
+            <div
+          className={`flex items-center space-x-1 cursor-pointer ${
+            liked ? "text-red-500" : "text-gray-500"
+          }`} // Change color based on liked state
+          onClick={handleLike} // Handle click event to like/unlike
+        >
+          <Heart className="h-6 w-6" />
+          <span>{likesCounter}</span> {/* Update likes count */}
               </div>
   
               <div className="flex items-center space-x-1 cursor-pointer">
@@ -149,6 +199,7 @@ export type PostNoImageCardProps = {
               className={`p-0 ${bookmarked ? "text-yellow-500" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
+
                 e.preventDefault();
                 toggleBookmark();
               }}

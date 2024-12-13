@@ -88,19 +88,34 @@ export default function AddPostForm() {
     loadTags();
   }, []);
 
+
   async function onSubmit(values: z.infer < typeof formSchema > ) {
     console.log(files);
+
+    let base64ImageString: string | undefined;
+  if (files?.length) {
+    const file = files[0];
+    const fileReader = new FileReader();
+
+    // Convert the file to a Base64 string
+    const fullBase64ImageString = await new Promise<string>((resolve, reject) => {
+      fileReader.onload = () => resolve(fileReader.result as string);
+      fileReader.onerror = () => reject(new Error("Failed to read file"));
+      fileReader.readAsDataURL(file); // Converts to Base64
+    });
+    
+    base64ImageString = fullBase64ImageString.split(",")[1];
+  }
     const post = {
       title: values.title_input,
-      description: "", 
       content: values.content_textarea,
       tags: values.tags_menu,
-      image: files?.length ? URL.createObjectURL(files[0]) : undefined,
+      image: base64ImageString
     };
     
    try {
     const result = await addPost(post);
-    router.push("/");
+    router.push("/posts");
     console.log(result);
    } catch (error) {
     console.error("Error adding post:", error);

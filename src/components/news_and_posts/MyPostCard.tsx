@@ -8,21 +8,15 @@ import { description } from "../login/login-form";
 import { Badge } from "../ui/badge";
 import { DateDisplay } from "@/app/utils/FormatDate";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@/components/ui/dialog"
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { addLike, deleteLike, deletePost, fetchLikesByPostId, isLiked, PostLikeDto } from "@/services/postService";
+import { AspectRatio } from "../ui/aspect-ratio";
 import { getUser } from "@/services/authenticationService";
 
-export type PostNoImageCardProps = {
+export type PostCardProps = {
     postId: string;
     avatarUrl: string;
     avatarFallback: string;
@@ -31,12 +25,13 @@ export type PostNoImageCardProps = {
     title: string;
     content: string;
     categories: string[];
+    image: string;
     likes: number;
     comments: number;
     updatedAt: string;
     onDelete: (postId: number) => void;
   };
-export function MyPostNoImageCard({
+export function MyPostCard({
     postId,
     avatarUrl,
     avatarFallback,
@@ -45,33 +40,35 @@ export function MyPostNoImageCard({
     title,
     content,
     categories,
+    image,
     likes,
     comments,
     updatedAt,
     onDelete
-  }: PostNoImageCardProps) {
-    const [liked, setLiked] = useState<boolean>(false);
-    const [likeId, setLikeId] = useState<number | null>(null);
+  }: PostCardProps) {
     const router = useRouter();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
+    const postImageUrl = `data:image/jpeg;base64,${image}`;
+    const [liked, setLiked] = useState<boolean>(false);
+    const [likeId, setLikeId] = useState<number | null>(null);
     const [likesCounter, setLikesCounter] = useState<number>(likes);
     const handleUpdateClick = (e: React.MouseEvent) => {
       e.stopPropagation();
       e.preventDefault();
-        router.push(`/update/${postId}`);
+      router.push(`/update/${postId}`);
     }
 
     const handleDeleteClick = async (e: React.MouseEvent) => {
       e.stopPropagation();
       e.preventDefault();
-        await deletePost(Number(postId));
-        onDelete(Number(postId));
-      };
+      await deletePost(Number(postId));
+      onDelete(Number(postId));
+    };
 
       const isEdited = createdAt !== updatedAt;
-
-      useEffect(() => {
+    
+    useEffect(() => {
         async function checkIfLiked() {
             const user = await getUser();
             
@@ -113,7 +110,7 @@ export function MyPostNoImageCard({
         const addedLike = await addLike({postId: Number(postId)});
         setLiked(true); // Update local state to reflect the like
         setLikeId(addedLike.id); // Store the likeId of the added like
-        setLikesCounter(prevLikes => prevLikes + 1);
+        setLikesCounter(prevLikes => prevLikes - 1);
         }
     };
   
@@ -168,11 +165,11 @@ export function MyPostNoImageCard({
         </div>
       </CardHeader><CardContent>
           <CardTitle className="font-bold text-lg">{title}</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground line-clamp-3 ">
+          <CardDescription className="text-sm text-muted-foreground line-clamp-3 " suppressHydrationWarning={true}>
             {content}
           </CardDescription>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 mb-4">
             {categories.map((category, index) => (
               <Badge
                 key={index}
@@ -185,6 +182,17 @@ export function MyPostNoImageCard({
             ))}
           </div>
 
+          <div suppressHydrationWarning={true}>
+            <AspectRatio ratio={16 / 9} className="bg-muted"  suppressHydrationWarning={true}>
+                <Image
+                    
+                    src={postImageUrl}
+                    alt="Photo by Drew Beamer"
+                    fill
+                    className="h-full w-full rounded-md object-cover"
+                />
+            </AspectRatio>
+            </div>
           <div className="mt-4 flex justify-between items-center">
             <div className="flex space-x-4 items-center text-muted-foreground">
             <div
@@ -195,8 +203,7 @@ export function MyPostNoImageCard({
         >
           <Heart className="h-6 w-6" />
           <span>{likesCounter}</span> {/* Update likes count */}
-              </div>
-
+        </div>
               <div
                 className="flex items-center space-x-1 cursor-pointer"
               >

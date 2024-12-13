@@ -306,9 +306,10 @@ export async function addBookmark(userId: number, postId: number): Promise<UserD
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+       "Content-Type": "application/json",
       },
-      body: JSON.stringify(postId)
+      body: JSON.stringify(postId),
+
     });
     const result: Result<UserDto> = await response.json();
     return result.data;
@@ -320,8 +321,8 @@ export async function deleteBookmark(userId: number, postId: number) {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-      },
-      body: JSON.stringify(postId)
+       },
+       body: JSON.stringify(postId),
     });
 }
 

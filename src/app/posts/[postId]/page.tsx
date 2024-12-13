@@ -5,7 +5,9 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"; // For 
 import { Badge } from "@/components/ui/badge"; // Assuming Badge component is in your UI library
 import { Button } from "@/components/ui/button"; // Assuming Button component is in your UI library
 import { Input } from "@/components/ui/input"; // Assuming Input component is in your UI library
-import { addLike, deleteLike, fetchLikesByPostId, fetchPostById, fetchPosts, isLiked, PostLikeDto, UserDto } from "@/services/postService"; // Replace with your API service function
+
+import { addLike, deleteLike, fetchLikesByPostId, fetchPostById, fetchPosts, isLiked, PostLikeDto, UserDto, addBookmark, deleteBookmark,  addComment, AddPostCommentDto  } from "@/services/postService"; // Replace with your API service function
+
 import { PostDto, PostCommentDto } from "@/services/postService";
 import { Bookmark, Heart, MessageCircle, Send } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -21,16 +23,25 @@ import { getUser } from "@/services/authenticationService";
 
 
 export default function PostPage() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const params = useParams();
   const postId = params.postId;
   const [post, setPost] = useState<PostDto | null>(null);
   const [newComment, setNewComment] = useState<string>("");
-  const [comments, setComments] = useState<PostCommentDto[]>([]);
+
   const [liked, setLiked] = useState<boolean>(false);
+=======
+  const [comments, setComments] = useState<PostCommentDto[]>(() => {
+    const initialComments = post?.comments || [];
+    return initialComments.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  });
+
   const [commented, setCommented] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const newCommentLength = newComment.trim().length
   const authorProfileImageUrl = `data:image/jpeg;base64,${post?.userDto.profilePicture}`;
   const[postImageUrl, setPostImageUrl] = useState<string>(); 
@@ -101,6 +112,50 @@ export default function PostPage() {
 
   const isEdited = post.createdAt !== post.updatedAt;
 
+  const toggleBookmark = async () => {
+    try {
+      setIsLoading(true);
+      const user = await getUser(); // Get the user object
+      const userId = user.id; // Extract the user ID
+      if (bookmarked) {
+        await deleteBookmark(userId, Number(postId));
+        setBookmarked(false);
+      } else {
+        await addBookmark(userId, Number(postId));
+        setBookmarked(true);
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newComment.trim()) {
+      return;
+    }
+
+    try {
+      const commentData: AddPostCommentDto = {
+        content: newComment.trim(),
+        postId: post.id,
+      };
+
+      const addedComment = await addComment(commentData);
+
+      // Prepend the new comment to the comments array
+      setComments((prevComments) => [addedComment, ...prevComments]);
+
+      setNewComment("");
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+      // Handle the error appropriately
+    }
+  };
+
   return (
     <><NavBar /><Card className="max-w-3xl mx-auto p-10 pt-3">
       {/* Post Header */}
@@ -161,6 +216,7 @@ export default function PostPage() {
           <span>{post?.likes }</span> {/* Update likes count */}
         </div>
 
+
           <div
             className={`flex items-center space-x-1 cursor-pointer ${commented ? "text-blue-500" : ""}`}
 
@@ -170,36 +226,37 @@ export default function PostPage() {
           </div>
         </div>
 
-        <div
-          className={`cursor-pointer ${bookmarked ? "text-yellow-500" : ""}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            setBookmarked(!bookmarked);
-            
-          } }
-        >
-          
-          <Bookmark className="h-6 w-6" />
+        <div className="flex justify-end">
+          <button
+            onClick={toggleBookmark}
+            disabled={isLoading}
+            className={`flex items-center gap-1 text-gray-500 hover:text-gray-700 ${bookmarked ? "text-yellow-500" : ""}`}
+          >
+            <Bookmark className="h-5 w-5" />
+            {bookmarked ? "Bookmarked" : "Bookmark"}
+          </button>
         </div>
       </div>
       {/* Comments Section */}
       <Separator />
-      <form
-        className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring mt-4">
+      <form onSubmit={handleAddComment}>
         <Textarea
-          id="comment"
           placeholder="What do you think?"
           className="min-h-12 resize-none border-none p-3 shadow-none focus-visible:ring-0"
           autoComplete="off"
           value={newComment}
-          onChange={(event) => setNewComment(event.target.value)} />
+          onChange={(event) => setNewComment(event.target.value)}
+        />
         <div className="flex items-center p-3 pt-0">
-          <Button type="submit" size="sm" className="flex justify-end ml-auto gap-1.5" disabled={newCommentLength === 0}>
+          <Button
+            type="submit"
+            size="sm"
+            className="flex justify-end ml-auto gap-1.5"
+            disabled={!newComment.trim()}
+          >
             Comment
           </Button>
         </div>
-
-
       </form>
       <div>
         <h2 className="text-lg font-semibold mt-4">Comments</h2>
@@ -208,23 +265,32 @@ export default function PostPage() {
             <div key={comment.id} className="-mb-2 -ml-6 -mr-6">
               <Card className="border-none">
                 <CardHeader>
-                  <div className=" -mb-4">
+                  <div className="-mb-4">
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-7 h-7 rounded-full">
-                        <AvatarImage className="w-7 h-7 rounded-full" src={`data:image/jpeg;base64,${comment.user.profilePicture}`} />
-                        <AvatarFallback>{comment.user.username}</AvatarFallback>
+                        <AvatarImage
+                          className="w-7 h-7 rounded-full"
+                          src={`data:image/jpeg;base64,${comment.user.profilePicture}`}
+                        />
+                        <AvatarFallback>
+                          {comment.user.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium">{comment.user.username}</span>
-                      <div className="text-xs text-muted-foreground"><DateDisplay dateString={comment.createdAt}></DateDisplay></div>
+                      <span className="text-sm font-medium">
+                        {comment.user.username}
+                      </span>
+                      <div className="text-xs text-muted-foreground">
+                        <DateDisplay dateString={comment.createdAt} />
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="text-sm ">{comment.content}</CardContent>
+                <CardContent className="text-sm">{comment.content}</CardContent>
               </Card>
             </div>
           ))
         ) : (
-          <p className="text-sm">No comments yet.</p> 
+          <p>No comments yet.</p>
         )}
       </div>
 

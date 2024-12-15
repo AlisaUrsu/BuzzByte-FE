@@ -69,7 +69,8 @@ export function MyPostNoImageCard({
         onDelete(Number(postId));
       };
 
-      const isEdited = createdAt !== updatedAt;
+      const isEdited = Math.abs(new Date(createdAt).getTime() - new Date(updatedAt).getTime()) >= 60 * 1000;
+
 
       useEffect(() => {
         async function checkIfLiked() {

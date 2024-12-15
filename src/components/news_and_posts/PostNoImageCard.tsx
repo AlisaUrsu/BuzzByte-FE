@@ -23,7 +23,6 @@ export type PostNoImageCardProps = {
     likes: number;
     comments: number;
     updatedAt: string;
-    postId: number;
   };
 
 export function PostNoImageCard({
@@ -38,7 +37,6 @@ export function PostNoImageCard({
     likes,
     comments,
     updatedAt,
-    postId,
   }: PostNoImageCardProps) {
     const [liked, setLiked] = useState<boolean>(false);
     const [likeId, setLikeId] = useState<number | null>(null);
@@ -48,7 +46,8 @@ export function PostNoImageCard({
     const [isLoading, setIsLoading] = useState(false);
     const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
   
-    const isEdited = createdAt !== updatedAt;
+    const isEdited = Math.abs(new Date(createdAt).getTime() - new Date(updatedAt).getTime()) >= 60 * 1000;
+
 
     useEffect(() => {
       async function checkIfLiked() {

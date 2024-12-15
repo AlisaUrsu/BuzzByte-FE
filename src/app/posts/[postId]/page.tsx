@@ -31,7 +31,7 @@ export default function PostPage() {
   const [newComment, setNewComment] = useState<string>("");
 
   const [liked, setLiked] = useState<boolean>(false);
-=======
+
   const [comments, setComments] = useState<PostCommentDto[]>(() => {
     const initialComments = post?.comments || [];
     return initialComments.sort(

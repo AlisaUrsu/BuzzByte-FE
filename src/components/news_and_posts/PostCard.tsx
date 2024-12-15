@@ -10,7 +10,7 @@ import { DateDisplay } from "@/app/utils/FormatDate";
 import { AspectRatio } from "../ui/aspect-ratio";
 import Image from "next/image";
 import { getUser } from "@/services/authenticationService";
-import { addLike, deleteLike, fetchLikesByPostId, isLiked, PostLikeDto } from "@/services/postService";
+import { addBookmark, addLike, deleteBookmark, deleteLike, fetchLikesByPostId, isBookmarked, isLiked, PostLikeDto } from "@/services/postService";
 
 export type PostCardProps = {
     postId: number;
@@ -46,9 +46,10 @@ export function PostCard({
     const [bookmarked, setBookmarked] = useState(false);
     const profileImageUrl = `data:image/jpeg;base64,${avatarUrl}`;
     const postImageUrl = `data:image/jpeg;base64,${image}`;
+    const [isLoading, setIsLoading] = useState(false);
     const [likesCounter, setLikesCounter] = useState<number>(likes);
 
-    const isEdited = createdAt !== updatedAt;
+    const isEdited = Math.abs(new Date(createdAt).getTime() - new Date(updatedAt).getTime()) >= 60 * 1000;
 
     useEffect(() => {
         async function checkIfLiked() {
@@ -74,6 +75,36 @@ export function PostCard({
       
           checkIfLiked();
         }, [likeId, postId]);
+
+      useEffect(() => {
+            const checkBookmarkStatus = async () => {
+              try {
+                const bookmarked = await isBookmarked(postId);
+                setBookmarked(bookmarked);
+              } catch (error) {
+                console.error('Error checking bookmark status:', error);
+              }
+            };
+            checkBookmarkStatus();
+          }, [postId]);
+
+    const toggleBookmark = async () => {
+          const userId = (await getUser()).id;
+          try {
+            setIsLoading(true);
+            if (bookmarked) {
+              await deleteBookmark(userId, postId);
+              setBookmarked(false);
+            } else {
+              await addBookmark(userId, postId);
+              setBookmarked(true);
+            }
+          } catch (error) {
+            console.error('Error toggling bookmark:', error);
+          } finally {
+            setIsLoading(false);
+          }
+        };
     
 
     const handleLike = async (e: React.MouseEvent) => {

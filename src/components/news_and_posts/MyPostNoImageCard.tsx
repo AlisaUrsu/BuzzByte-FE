@@ -147,7 +147,7 @@ export function MyPostNoImageCard({
 
                 <AlertDialogTrigger asChild>
 
-                  <DropdownMenuItem className="text-red-500 cursor-pointer">Delete</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={(e) => e.stopPropagation()}>Delete</DropdownMenuItem>
                 </AlertDialogTrigger>
 
 
@@ -191,11 +191,11 @@ export function MyPostNoImageCard({
             <div
           className={`flex items-center space-x-1 cursor-pointer ${
             liked ? "text-red-500" : "text-gray-500"
-          }`} // Change color based on liked state
-          onClick={handleLike} // Handle click event to like/unlike
+          }`} 
+          onClick={handleLike} 
         >
           <Heart className="h-6 w-6" />
-          <span>{likesCounter}</span> {/* Update likes count */}
+          <span>{likesCounter}</span> {}
               </div>
 
               <div

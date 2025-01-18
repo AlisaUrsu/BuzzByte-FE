@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string): { formattedDate: string; isRelative: boolean } {
   const date = new Date(dateString);
   const now = new Date();
 
@@ -13,26 +13,26 @@ export function formatDate(dateString: string): string {
   const diffInMonths = now.getMonth() - date.getMonth() + 12 * (now.getFullYear() - date.getFullYear());
 
   if (diffInMinutes < 60) {
-    return `${diffInMinutes} min`;
+    return { formattedDate: `${diffInMinutes} min`, isRelative: true };
   } else if (diffInHours < 24) {
-    return `${diffInHours}h`;
+    return { formattedDate: `${diffInHours}h`, isRelative: true };
   } else if (diffInDays < 7) {
-    return `${diffInDays}d`;
+    return { formattedDate: `${diffInDays}d`, isRelative: true };
   } else if (diffInWeeks < 4) {
-    return `${diffInWeeks}w`;
+    return { formattedDate: `${diffInWeeks}w`, isRelative: true };
   } else if (diffInMonths < 1) {
-    return `${diffInWeeks}w`;
+    return { formattedDate: `${diffInWeeks}w`, isRelative: true };
   } else {
     // If older than a month, return a formatted date
-    return format(date, "MMM dd, yyyy");
+    return { formattedDate: format(date, "MMM dd, yyyy"), isRelative: false };
   }
 }
 
 // Usage in component
 export function DateDisplay({ dateString }: { dateString: string }) {
-  const formattedDate = useMemo(() => formatDate(dateString), [dateString]);
+  const { formattedDate, isRelative } = useMemo(() => formatDate(dateString), [dateString]);
 
-  return <span>{formattedDate} ago</span>;
+  return <span>{formattedDate}{isRelative ? " ago" : ""}</span>;
 }
 
 export const formatAsLocalDateTimeWithMillis = (date: Date): string => {

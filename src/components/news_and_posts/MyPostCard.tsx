@@ -144,13 +144,13 @@ export function MyPostCard({
 
                 <AlertDialogTrigger asChild>
 
-                  <DropdownMenuItem className="text-red-500 cursor-pointer">Delete</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={(e) => e.stopPropagation()}>Delete</DropdownMenuItem>
                 </AlertDialogTrigger>
 
 
               </DropdownMenuContent>
             </DropdownMenu>
-            <AlertDialogContent>
+            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Post</AlertDialogTitle>
                 <AlertDialogDescription>

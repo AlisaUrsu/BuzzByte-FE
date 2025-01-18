@@ -32,31 +32,9 @@ export const containerClassName =
 type LoginFormData = z.infer<typeof loginSchema>;
 
 
-const mockFetchLogin = async (values: LoginFormData): Promise<Response> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            if (values.email === "test@example.com" && values.password === "password123") {
-                resolve({
-                    ok: true,
-                    json: async () => ({
-                        accessToken: "mockAccessToken",
-                        refreshToken: "mockRefreshToken",
-                    }),
-                } as Response);
-            } else {
-                resolve({
-                    ok: false,
-                    json: async () => ({ message: "Invalid email or password." }),
-                } as Response);
-            }
-        }, 1000);
-    });
-};
-
-
 const loginSchema = z.object({
     username: z.string(),
-    password: z.string().min(6, "Password must be at least 6 characters").max(200, "Password must be at most 200 characters")
+    password: z.string()
 });
 
 interface LoginFormProps {

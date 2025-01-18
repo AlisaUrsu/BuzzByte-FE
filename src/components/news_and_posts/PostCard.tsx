@@ -126,6 +126,8 @@ export function PostCard({
         setLikesCounter(prevLikes => prevLikes + 1);
         }
     };
+
+    
   
     return (
         <Card className="shadow-md border rounded-lg mt-2">
@@ -209,17 +211,19 @@ export function PostCard({
               </div>
             </div>
 
-            <div
-              className={`cursor-pointer ${bookmarked ? "text-yellow-500" : ""
-                }`}
+            <Button
+              variant="ghost"
+              className={`p-0 ${bookmarked ? "text-yellow-500" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
+
                 e.preventDefault();
-                setBookmarked(!bookmarked);
+                toggleBookmark();
               }}
+              disabled={isLoading}
             >
               <Bookmark className="h-5 w-5" />
-            </div>
+            </Button>
           </div>
         </CardContent>
 

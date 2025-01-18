@@ -91,16 +91,15 @@ export default function Home() {
         if (tags.length == 0){
           const currentUser = await getUser();
           const tagNames = currentUser.tags.map(tag => tag.name);
-          newPosts = await fetchPosts ({pageNumber: page, pageSize: 100, postTags: tagNames});
-        } else if (newTags.length > 0) {
-          newPosts = await fetchPosts ({pageNumber: page, pageSize: 100, postTags: newTags});
+          newPosts = await fetchPosts ({pageNumber: page, pageSize: 100, postTags: tagNames, postTitle: title, postContent: content, startDate: startDate, endDate: endDate});
         }
-        
         else {
           newPosts = await fetchPosts({pageNumber: page, pageSize: 100, postTags: tags, postTitle: title, postContent: content, startDate: startDate, endDate: endDate});
         }
+        const currentUser = await getUser();
+        const tagNames = currentUser.tags.map(tag => tag.name);
+        newPosts = await fetchPosts ({pageNumber: page, pageSize: 100, postTags: tagNames, postTitle: title, postContent: content, startDate: startDate, endDate: endDate});
         setPosts(newPosts.items);
-         // console.log(newPosts.items[0].userDto.username);
       
       } catch (error) {
         console.error("Error loading posts:", error);
@@ -111,12 +110,10 @@ export default function Home() {
     async function loadTags() {
       try {
         const tagsDto = await fetchTags({ pageNumber: 0, pageSize: 100 });
-        const currentUser = await getUser();  // Get the current user
-        // Get the tags the user already has
+        const currentUser = await getUser(); 
         const userTags = currentUser.tags.map(tag => tag.name);
         const tags = tagsDto.items.map((tag) => tag.name)
         console.log(userTags);
-        // Filter the available tags to remove the user's tags
         const filteredTags = tags.filter(tag => !userTags.includes(tag));
         setAvailableTags(filteredTags.map((tag) => tag));
       } catch (error) {
@@ -133,6 +130,7 @@ export default function Home() {
     const userTags = currentUser.tags.map(tag => tag.name);
     await addTagsToUser(currentUser.id, [...userTags, ...newTags]);
     setPage(0);
+    window.location.reload();
   }
 
   

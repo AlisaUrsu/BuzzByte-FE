@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"; // Assuming Badge component is in
 import { Button } from "@/components/ui/button"; // Assuming Button component is in your UI library
 import { Input } from "@/components/ui/input"; // Assuming Input component is in your UI library
 
-import { addLike, deleteLike, fetchLikesByPostId, fetchPostById, fetchPosts, isLiked, PostLikeDto, UserDto, addBookmark, deleteBookmark,  addComment, AddPostCommentDto  } from "@/services/postService"; // Replace with your API service function
+import { addLike, deleteLike, fetchLikesByPostId, fetchPostById, fetchPosts, isLiked, PostLikeDto, UserDto, addBookmark, deleteBookmark,  addComment, AddPostCommentDto, isBookmarked, fetchBookmarkedPosts  } from "@/services/postService"; // Replace with your API service function
 
 import { PostDto, PostCommentDto } from "@/services/postService";
 import { Bookmark, Heart, MessageCircle, Send } from "lucide-react";
@@ -46,6 +46,7 @@ export default function PostPage() {
   const authorProfileImageUrl = `data:image/jpeg;base64,${post?.userDto.profilePicture}`;
   const[postImageUrl, setPostImageUrl] = useState<string>(); 
   const [likeId, setLikeId] = useState<number | null>(null);
+  const [bookmarkId, setBookmarkId] = useState<number | null>(null);
   const [currentUser, setCurrentUser] = useState<UserDto>();
 
 
@@ -69,42 +70,56 @@ export default function PostPage() {
       const user = await getUser();
       setCurrentUser(user);
       if (postId) {
-        const likedStatus = await isLiked(Number(postId)); // Check if current user liked the post
+        const likedStatus = await isLiked(Number(postId)); 
         setLiked(likedStatus);
         if (likedStatus) {
-          // If liked, we should fetch the likeId to delete it later
           const data = await fetchLikesByPostId(Number(postId));
           console.log(data);
-          // Assume the server returns the list of likes for the post
-          // Now find the likeId of the current user and store it
           const userLike = data.find((like: PostLikeDto) => like.user.id === user.id);
           console.log(userLike);
           if (userLike) {
-            setLikeId(userLike.id); // Store the likeId for later use
+            setLikeId(userLike.id);
+          }
+        }
+      }
+    }
+
+    async function checkIfBookmarked() {
+      const user = await getUser();
+      setCurrentUser(user);
+      if (postId) {
+        const bookmarkedStatus = await isBookmarked(Number(postId)); 
+        setBookmarked(bookmarkedStatus);
+        if (bookmarkedStatus) {
+          const data = await fetchBookmarkedPosts(Number(user.id));
+          console.log(data);
+          const userBookmark = data.find((post: PostDto) => post.userDto.id === user.id);
+          console.log(userBookmark);
+          if (userBookmark) {
+            setBookmarkId(userBookmark.id);
           }
         }
       }
     }
 
     checkIfLiked();
+    checkIfBookmarked();
     loadPost();
-  }, [postId, likeId]);
+  }, [postId, likeId, bookmarkId]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (liked) {
-      // If already liked, remove the like
       if (likeId) {
-        await deleteLike(likeId); // Pass the likeId to delete the like
-        setLiked(false); // Update local state to reflect the unlike
-        setLikeId(null); // Clear the likeId after deletion
+        await deleteLike(likeId); 
+        setLiked(false); 
+        setLikeId(null); 
       }
     } else {
-      // If not liked, add the like
       const addedLike = await addLike({postId: Number(postId)});
-      setLiked(true); // Update local state to reflect the like
-      setLikeId(addedLike.id); // Store the likeId of the added like
+      setLiked(true); 
+      setLikeId(addedLike.id); 
     }
   };
 
@@ -115,8 +130,8 @@ export default function PostPage() {
   const toggleBookmark = async () => {
     try {
       setIsLoading(true);
-      const user = await getUser(); // Get the user object
-      const userId = user.id; // Extract the user ID
+      const user = await getUser(); 
+      const userId = user.id;
       if (bookmarked) {
         await deleteBookmark(userId, Number(postId));
         setBookmarked(false);
@@ -146,19 +161,17 @@ export default function PostPage() {
 
       const addedComment = await addComment(commentData);
 
-      // Prepend the new comment to the comments array
       setComments((prevComments) => [addedComment, ...prevComments]);
 
       setNewComment("");
     } catch (error) {
       console.error("Failed to add comment:", error);
-      // Handle the error appropriately
+
     }
   };
 
   return (
     <><NavBar /><Card className="max-w-3xl mx-auto p-10 pt-3">
-      {/* Post Header */}
       <CardHeader className="">
         <div className="-ml-6 -mb-2">
 
@@ -176,10 +189,8 @@ export default function PostPage() {
         </div>
       </CardHeader>
 
-      {/* Post Title */}
       <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
 
-      {/* Post Tags */}
       <div className="mb-6 flex flex-wrap gap-2">
         {post.tags.map((tag) => (
           <Badge key={tag.id} variant="secondary">
@@ -188,7 +199,6 @@ export default function PostPage() {
         ))}
       </div>
 
-      {/* Post Content */}
       <p className="text-base text-gray-700 mb-2">{post.content}</p>
       {postImageUrl &&(
       <div suppressHydrationWarning={true}>
@@ -203,17 +213,16 @@ export default function PostPage() {
             </AspectRatio>
             </div>
       )}
-      {/* Actions */}
       <div className="mt-6 mb-4 flex justify-between items-center">
         <div className="flex space-x-4 items-center text-muted-foreground">
         <div
           className={`flex items-center space-x-1 cursor-pointer ${
             liked ? "text-red-500" : "text-gray-500"
-          }`} // Change color based on liked state
-          onClick={handleLike} // Handle click event to like/unlike
+          }`} 
+          onClick={handleLike} 
         >
           <Heart className="h-6 w-6" />
-          <span>{post?.likes }</span> {/* Update likes count */}
+          <span>{post?.likes }</span> 
         </div>
 
 
@@ -237,7 +246,6 @@ export default function PostPage() {
           </button>
         </div>
       </div>
-      {/* Comments Section */}
       <Separator />
       <form onSubmit={handleAddComment}>
         <Textarea

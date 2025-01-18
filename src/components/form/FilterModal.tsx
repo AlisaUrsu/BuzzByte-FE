@@ -45,26 +45,27 @@ export default function FilterModal({ onSubmit }: { onSubmit: (tags: string[] | 
   const handleAgeChange = (value: string) => {
     setSelectedPostAge(value);
     setSelectedDateRange(undefined);
-    // Reset the date range when a predefined age range is selected
     if (value) {
       const now = new Date();
       if (value === "this-week") {
         const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - 7); // Set start to 7 days ago
+        weekStart.setDate(now.getDate() - 7); 
         setStartDate(weekStart);
         setEndDate(now);
       } else if (value === "this-month") {
         const monthStart = new Date(now);
-        monthStart.setMonth(now.getMonth() - 1); // Set start to 1 month ago
+        monthStart.setMonth(now.getMonth() - 1); 
         setStartDate(monthStart);
         setEndDate(now);
       } else if (value === "this-year") {
         const yearStart = new Date(now);
-        yearStart.setFullYear(now.getFullYear() - 1); // Set start to 1 year ago
+        yearStart.setFullYear(now.getFullYear() - 1); 
         setStartDate(yearStart);
         setEndDate(now);
       } else if (value === "this-day") {
-        setStartDate(now);
+        const dayStart = new Date(now);
+        dayStart.setDate(now.getDate() - 1);
+        setStartDate(dayStart);
         setEndDate(now);
       }
     }
@@ -73,9 +74,9 @@ export default function FilterModal({ onSubmit }: { onSubmit: (tags: string[] | 
   const handleDateRangeChange = (range: { from: Date | undefined; to: Date | undefined }) => {
     setStartDate(range.from || null);
     if (range.to) {
-      // Set the end date to the last moment of the selected day
+     
       const adjustedEndDate = new Date(range.to);
-      adjustedEndDate.setHours(23, 59, 59, 999); // Set time to 23:59:59.999
+      adjustedEndDate.setHours(23, 59, 59, 999); 
       setEndDate(adjustedEndDate);
     } else {
       setEndDate(null);
